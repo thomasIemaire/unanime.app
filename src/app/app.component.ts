@@ -162,6 +162,10 @@ export class AppComponent implements OnDestroy {
     this.liveFormService.moveToNextQuestion();
   }
 
+  public onResetForm(): void {
+    this.liveFormService.resetForm();
+  }
+
   public canCloseQuestion(state: LiveState | null | undefined): boolean {
     if (this.liveFormService.roleSnapshot !== 'admin' || !state) {
       return false;

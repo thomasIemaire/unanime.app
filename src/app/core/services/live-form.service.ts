@@ -192,6 +192,21 @@ export class LiveFormService implements OnDestroy {
         socket.emit('admin:next', { formId });
     }
 
+    public resetForm(): void {
+        if (this.roleSubject.value !== 'admin') {
+            return;
+        }
+
+        const socket = this.socket;
+        const formId = this.currentFormId;
+        if (!socket || !socket.connected || !formId) {
+            this.errorSubject.next('Connexion administrateur indisponible, veuillez réessayer.');
+            return;
+        }
+
+        socket.emit('admin:reset_form', { formId });
+    }
+
     private initializeSocket(): void {
         if (!this.joinParams) {
             return;

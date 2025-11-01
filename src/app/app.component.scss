@@ -73,6 +73,11 @@
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
 }
 
+.admin-controls__button--danger {
+  background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+  box-shadow: 0 12px 30px rgba(153, 27, 27, 0.25);
+}
+
 .waiting-message {
   margin-top: 2rem;
   padding: 2.5rem 2rem;
