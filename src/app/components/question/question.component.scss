@@ -24,14 +24,14 @@
             animation: bounceIn 0.6s ease;
 
             width: 100%;
-            padding: var(--padding-question-container) 0;
+            padding: var(--padding-question-container);
             border-radius: var(--radius-question-container);
-            background: transparent;
+            background: linear-gradient(to top right, #0000000c, transparent);
 
 
             .question-title__wrapper {
-                padding: 2rem 0;
-                background: transparent;
+                padding: 2rem;
+                background: linear-gradient(to top right, #ffffff, #fafafa);
                 border-radius: calc(var(--radius-question-container) - var(--padding-question-container));
 
                 text-align: center;
