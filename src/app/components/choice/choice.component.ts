@@ -11,32 +11,38 @@ import { QuestionChoice } from "../../core/models/question.model";
         [class.disabled]="disabled"
         [style.animationDelay]="(index * 0.1) + 's'">
         <div class="choice__wrapper" [class.selected]="isSelected">
-            <span class="choice__text">{{ choice.text }}</span>
+            <ng-container [ngSwitch]="choice.input">
+                <span *ngSwitchCase="'choice'" class="choice__text">{{ choice.text }}</span>
 
-            <ng-container *ngIf="isSelected">
-                <input
-                    *ngIf="choice.input === 'text'"
-                    class="choice__input"
-                    type="text"
-                    [value]="value"
-                    [attr.minlength]="choice.constraints?.minLength ?? null"
-                    [attr.maxlength]="choice.constraints?.maxLength ?? null"
-                    (click)="$event.stopPropagation()"
-                    (input)="onValueInput($event)"
-                    [disabled]="disabled"
-                />
+                <label *ngSwitchCase="'text'" class="choice__text choice__text--with-input">
+                    <span class="choice__label">{{ choice.text }}</span>
+                    <input
+                        *ngIf="isSelected"
+                        class="choice__input"
+                        type="text"
+                        [value]="value"
+                        [attr.minlength]="choice.constraints?.minLength ?? null"
+                        [attr.maxlength]="choice.constraints?.maxLength ?? null"
+                        (click)="$event.stopPropagation()"
+                        (input)="onValueInput($event)"
+                        [disabled]="disabled"
+                    />
+                </label>
 
-                <input
-                    *ngIf="choice.input === 'number'"
-                    class="choice__input"
-                    type="number"
-                    [value]="value"
-                    [attr.min]="choice.constraints?.minValue ?? null"
-                    [attr.max]="choice.constraints?.maxValue ?? null"
-                    (click)="$event.stopPropagation()"
-                    (input)="onValueInput($event)"
-                    [disabled]="disabled"
-                />
+                <label *ngSwitchCase="'number'" class="choice__text choice__text--with-input">
+                    <span class="choice__label">{{ choice.text }}</span>
+                    <input
+                        *ngIf="isSelected"
+                        class="choice__input"
+                        type="number"
+                        [value]="value"
+                        [attr.min]="choice.constraints?.minValue ?? null"
+                        [attr.max]="choice.constraints?.maxValue ?? null"
+                        (click)="$event.stopPropagation()"
+                        (input)="onValueInput($event)"
+                        [disabled]="disabled"
+                    />
+                </label>
             </ng-container>
         </div>
     </div>
