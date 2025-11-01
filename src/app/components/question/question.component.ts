@@ -128,7 +128,7 @@ export class QuestionComponent implements OnChanges {
         }
 
         const payload: QuestionAnswerSelection = {
-            choiceIds: Array.from(this.selectedChoiceIds)
+            choiceIds: this.buildSubmittedChoiceIds()
         };
 
         const textValue = this.getFirstValueByType("text");
@@ -243,5 +243,28 @@ export class QuestionComponent implements OnChanges {
 
         const parsed = Number(raw);
         return Number.isNaN(parsed) ? undefined : parsed;
+    }
+
+    private buildSubmittedChoiceIds(): string[] {
+        const ids: string[] = [];
+
+        for (const choiceId of this.selectedChoiceIds) {
+            const choice = this.question.choices.find((item) => item.id === choiceId);
+            if (!choice) {
+                continue;
+            }
+
+            if (choice.input === "text") {
+                const value = this.choiceValues.get(choiceId)?.trim();
+                if (value) {
+                    ids.push(value);
+                    continue;
+                }
+            }
+
+            ids.push(choiceId);
+        }
+
+        return ids;
     }
 }
