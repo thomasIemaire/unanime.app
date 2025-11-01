@@ -6,7 +6,7 @@
     </span>
   </div>
 
-  <ng-container *ngIf="visible; else pending">
+  <ng-container *ngIf="visible || !showPendingMessage; else pending">
     <apx-chart
       *ngIf="hasData"
       class="results__chart"

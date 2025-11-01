@@ -105,6 +105,7 @@ export type ClientToServerEvents = {
     'admin:lock': (payload: AdminActionPayload) => void;
     'admin:next': (payload: AdminActionPayload) => void;
     'admin:reveal': (payload: AdminActionPayload) => void;
+    'admin:results': (payload: AdminActionPayload) => void;
 };
 
 export type ServerToClientEvents = {

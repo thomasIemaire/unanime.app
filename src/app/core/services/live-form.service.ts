@@ -5,6 +5,7 @@ import { io, type Socket } from 'socket.io-client';
 
 import { environment } from '../../../environments/environment';
 import type {
+    AdminActionPayload,
     ClientToServerEvents,
     ErrorMessagePayload,
     Form,
@@ -35,6 +36,7 @@ export class LiveFormService implements OnDestroy {
     private socket?: Socket<ServerToClientEvents, ClientToServerEvents>;
     private currentFormId: string | null = null;
     private lastQuestionId: string | null = null;
+    private lastRequestedResultsQuestionId: string | null = null;
     private joinParams?: JoinFormPayload;
     private disconnecting = false;
 
@@ -82,6 +84,7 @@ export class LiveFormService implements OnDestroy {
             this.currentFormId = trimmedId;
             this.lastQuestionId = null;
             this.resultsSubject.next(null);
+            this.lastRequestedResultsQuestionId = null;
             this.roleSubject.next(role);
 
             this.joinParams = {
@@ -115,6 +118,7 @@ export class LiveFormService implements OnDestroy {
         this.disconnecting = false;
         this.joinParams = undefined;
         this.currentFormId = null;
+        this.lastRequestedResultsQuestionId = null;
         this.resetState();
         this.formSubject.next(null);
         this.roleSubject.next(null);
@@ -306,6 +310,7 @@ export class LiveFormService implements OnDestroy {
 
         if (!form || !state) {
             this.lastQuestionId = null;
+            this.lastRequestedResultsQuestionId = null;
             this.questionSubject.next(null);
             this.resultsSubject.next(null);
             return;
@@ -317,6 +322,7 @@ export class LiveFormService implements OnDestroy {
 
         if (this.lastQuestionId !== newQuestionId) {
             this.lastQuestionId = newQuestionId;
+            this.lastRequestedResultsQuestionId = null;
             const currentResults = this.resultsSubject.value;
             if (!newQuestionId || (currentResults && currentResults.questionId !== newQuestionId)) {
                 this.resultsSubject.next(null);
@@ -324,6 +330,29 @@ export class LiveFormService implements OnDestroy {
         }
 
         this.questionSubject.next(question ?? null);
+
+        this.requestAdminResults(newQuestionId);
+    }
+
+    private requestAdminResults(questionId: string | null): void {
+        if (this.roleSubject.value !== 'admin') {
+            return;
+        }
+
+        const socket = this.socket;
+        const formId = this.currentFormId;
+
+        if (!socket || !socket.connected || !formId || !questionId) {
+            return;
+        }
+
+        if (this.lastRequestedResultsQuestionId === questionId) {
+            return;
+        }
+
+        const payload: AdminActionPayload = { formId, questionId };
+        socket.emit('admin:results', payload);
+        this.lastRequestedResultsQuestionId = questionId;
     }
 
     private processAggregates(questionId: string, aggregates: any): QuestionAggregates {
@@ -392,6 +421,7 @@ export class LiveFormService implements OnDestroy {
         this.questionSubject.next(null);
         this.resultsSubject.next(null);
         this.lastQuestionId = null;
+        this.lastRequestedResultsQuestionId = null;
     }
 
     private buildApiUrl(path: string): string {
