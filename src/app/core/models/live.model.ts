@@ -106,6 +106,7 @@ export type ClientToServerEvents = {
     'admin:next': (payload: AdminActionPayload) => void;
     'admin:reveal': (payload: AdminActionPayload) => void;
     'admin:results': (payload: AdminActionPayload) => void;
+    'admin:reset_form': (payload: { formId: string }) => void;
 };
 
 export type ServerToClientEvents = {

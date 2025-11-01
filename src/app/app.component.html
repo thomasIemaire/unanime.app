@@ -19,6 +19,13 @@
                 >
                   Question suivante
                 </button>
+                <button
+                  type="button"
+                  class="admin-controls__button admin-controls__button--danger"
+                  (click)="onResetForm()"
+                >
+                  Réinitialiser le formulaire
+                </button>
               </div>
 
               <app-question-results
@@ -52,6 +59,13 @@
                   [disabled]="!canGoToNextQuestion(vm.state)"
                 >
                   Question suivante
+                </button>
+                <button
+                  type="button"
+                  class="admin-controls__button admin-controls__button--danger"
+                  (click)="onResetForm()"
+                >
+                  Réinitialiser le formulaire
                 </button>
               </div>
 
@@ -99,8 +113,8 @@
                 <app-question-results
                   [question]="question"
                   [results]="vm.results"
-                  [visible]="(vm.state?.revealResults ?? false) || (vm.state?.locked ?? false)"
-                  [showPendingMessage]="!((vm.state?.revealResults ?? false) || (vm.state?.locked ?? false))"
+                  [visible]="true"
+                  [showPendingMessage]="false"
                 ></app-question-results>
               </ng-template>
             </ng-template>
