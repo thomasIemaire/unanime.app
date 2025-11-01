@@ -157,48 +157,20 @@ export class AppComponent implements OnDestroy {
     this.hasSubmittedAnswer = true;
   }
 
-  public onCloseQuestion(): void {
-    this.liveFormService.closeCurrentQuestion();
-  }
-
-  public onNextQuestion(): void {
-    this.liveFormService.moveToNextQuestion();
-  }
-
-  public onCloseAndNext(state: LiveState | null | undefined): void {
-    if (this.canCloseQuestion(state)) {
-      this.onCloseQuestion();
-    }
-
-    if (this.canGoToNextQuestion(state)) {
-      this.onNextQuestion();
-    }
+  public onAdvanceToNextQuestion(): void {
+    this.liveFormService.completeCurrentQuestionAndMoveNext();
   }
 
   public onResetForm(): void {
     this.liveFormService.resetForm();
   }
 
-  public canCloseQuestion(state: LiveState | null | undefined): boolean {
-    if (this.liveFormService.roleSnapshot !== 'admin' || !state) {
+  public canAdvanceToNextQuestion(state: LiveState | null | undefined): boolean {
+    if (this.liveFormService.roleSnapshot !== 'admin') {
       return false;
     }
 
-    return !state.locked || !state.revealResults;
-  }
-
-  public canGoToNextQuestion(state: LiveState | null | undefined): boolean {
-    if (this.liveFormService.roleSnapshot !== 'admin' || !state) {
-      return false;
-    }
-
-    return !!state.locked;
-  }
-
-  public canCloseAndNext(
-    state: LiveState | null | undefined
-  ): boolean {
-    return this.canCloseQuestion(state) || this.canGoToNextQuestion(state);
+    return !!state && !!this.liveFormService.currentQuestionSnapshot;
   }
 
   public getQuestionProgress(

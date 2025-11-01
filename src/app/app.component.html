@@ -19,10 +19,10 @@
                 <button
                   type="button"
                   class="admin-controls__button admin-controls__button--secondary"
-                  (click)="onCloseAndNext(vm.state)"
-                  [disabled]="!canCloseAndNext(vm.state)"
+                  (click)="onAdvanceToNextQuestion()"
+                  [disabled]="!canAdvanceToNextQuestion(vm.state)"
                 >
-                  Fermer et question suivante
+                  Question suivante
                 </button>
                 <button
                   type="button"
@@ -57,10 +57,10 @@
                 <button
                   type="button"
                   class="admin-controls__button"
-                  (click)="onCloseAndNext(vm.state)"
-                  [disabled]="!canCloseAndNext(vm.state)"
+                  (click)="onAdvanceToNextQuestion()"
+                  [disabled]="!canAdvanceToNextQuestion(vm.state)"
                 >
-                  Fermer et question suivante
+                  Question suivante
                 </button>
                 <button
                   type="button"
