@@ -177,7 +177,7 @@ export class LiveFormService implements OnDestroy {
         socket.emit('admin:reveal', payload);
     }
 
-    public moveToNextQuestion(): void {
+    public completeCurrentQuestionAndMoveNext(): void {
         if (this.roleSubject.value !== 'admin') {
             return;
         }
@@ -189,6 +189,11 @@ export class LiveFormService implements OnDestroy {
             return;
         }
 
+        const questionId = this.questionSubject.value?.id;
+        const payload = { formId, questionId: questionId ?? undefined };
+
+        socket.emit('admin:lock', payload);
+        socket.emit('admin:reveal', payload);
         socket.emit('admin:next', { formId });
     }
 
