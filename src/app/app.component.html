@@ -88,6 +88,7 @@
                 [question]="question"
                 [locked]="true"
                 [showSubmitButton]="false"
+                [showChoices]="false"
               ></app-question>
 
               <div class="admin-controls">
@@ -137,14 +138,18 @@
               </ng-container>
 
               <ng-template #answeredWaiting>
-                <div class="waiting-message waiting-message--inline">
-                  <p>En attente des résultats…</p>
-                </div>
                 <app-question
                   [question]="question"
                   [locked]="true"
                   [showSubmitButton]="false"
+                  [showChoices]="false"
                 ></app-question>
+                <app-question-results
+                  [question]="question"
+                  [results]="vm.results"
+                  [visible]="vm.state?.revealResults ?? false"
+                  [showPendingMessage]="!(vm.state?.revealResults ?? false)"
+                ></app-question-results>
               </ng-template>
             </ng-template>
           </ng-template>
