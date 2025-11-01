@@ -110,8 +110,8 @@ export type ClientToServerEvents = {
 export type ServerToClientEvents = {
     state: (state: LiveState) => void;
     results: (payload: ResultsPayload) => void;
-    'admin:dashboard'?: (payload: unknown) => void;
-    'admin:results'?: (payload: unknown) => void;
-    'admin:explanation'?: (payload: unknown) => void;
+    'admin:dashboard': (payload: unknown) => void;
+    'admin:results': (payload: ResultsPayload) => void;
+    'admin:explanation': (payload: unknown) => void;
     error_msg: (payload: ErrorMessagePayload) => void;
 };
