@@ -1,1 +1,66 @@
-<app-question [question]="question"></app-question>
+<main class="layout">
+  <section class="layout__sidebar">
+    <h1 class="app-title">Live questionnaire</h1>
+
+    <form class="connection-form" [formGroup]="connectionForm" (ngSubmit)="connectToForm()">
+      <label class="connection-form__field">
+        <span>Identifiant du formulaire</span>
+        <input type="text" formControlName="formId" placeholder="Ex : demo-form" />
+        <small class="connection-form__error" *ngIf="connectionForm.get('formId')?.invalid && connectionForm.get('formId')?.touched">
+          Veuillez renseigner un identifiant valide.
+        </small>
+      </label>
+
+      <label class="connection-form__field">
+        <span>Code session (optionnel)</span>
+        <input type="text" formControlName="sessionCode" placeholder="Code participant" />
+      </label>
+
+      <label class="connection-form__field">
+        <span>Identifiant participant (optionnel)</span>
+        <input type="text" formControlName="participantId" placeholder="Identifiant personnalisé" />
+      </label>
+
+      <button class="connection-form__submit" type="submit" [disabled]="isConnecting">
+        {{ isConnecting ? 'Connexion…' : 'Rejoindre la session' }}
+      </button>
+    </form>
+
+    <p class="connection-form__error" *ngIf="connectionError">{{ connectionError }}</p>
+    <p class="connection-form__error" *ngIf="(error$ | async) as liveError">{{ liveError }}</p>
+  </section>
+
+  <section class="layout__content">
+    <ng-container *ngIf="vm$ | async as vm">
+      <ng-container *ngIf="vm.question as question; else waiting">
+        <div class="question-meta" *ngIf="vm.state as state">
+          <span class="question-meta__phase">
+            Phase : {{ state.phase === 'revealing' ? 'résultats' : 'questions' }}
+          </span>
+          <span class="question-meta__timer" *ngIf="state.timer?.remaining !== undefined">
+            Temps restant : {{ state.timer?.remaining }}s
+          </span>
+        </div>
+
+        <app-question
+          [question]="question"
+          [locked]="vm.state?.locked ?? false"
+          (submitAnswer)="onSubmitAnswer($event)"
+        ></app-question>
+
+        <app-question-results
+          [question]="question"
+          [results]="vm.results"
+          [visible]="vm.state?.revealResults ?? false"
+        ></app-question-results>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #waiting>
+      <div class="placeholder">
+        <h2>Sélectionnez un formulaire pour commencer</h2>
+        <p>Renseignez l'identifiant du formulaire dans le panneau de gauche.</p>
+      </div>
+    </ng-template>
+  </section>
+</main>
