@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 import { combineLatest } from 'rxjs';
@@ -82,8 +82,5 @@ export class AppComponent implements OnDestroy {
   public ngOnDestroy(): void {
     this.liveFormService.disconnect();
   }
-}
-function inject<T>(token: new (...args: any[]) => T): T {
-  return new token();
 }
 
