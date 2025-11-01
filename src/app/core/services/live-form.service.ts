@@ -30,6 +30,7 @@ export class LiveFormService implements OnDestroy {
     private readonly questionSubject = new BehaviorSubject<Question | null>(null);
     private readonly resultsSubject = new BehaviorSubject<QuestionAggregates | null>(null);
     private readonly errorSubject = new BehaviorSubject<string | null>(null);
+    private readonly roleSubject = new BehaviorSubject<'admin' | 'viewer' | null>(null);
 
     private socket?: Socket<ServerToClientEvents, ClientToServerEvents>;
     private currentFormId: string | null = null;
@@ -42,6 +43,7 @@ export class LiveFormService implements OnDestroy {
     public readonly currentQuestion$ = this.questionSubject.asObservable();
     public readonly results$ = this.resultsSubject.asObservable();
     public readonly error$ = this.errorSubject.asObservable();
+    public readonly role$ = this.roleSubject.asObservable();
 
     constructor(private readonly http: HttpClient) {}
 
@@ -74,12 +76,13 @@ export class LiveFormService implements OnDestroy {
                 this.http.get<Form>(this.buildApiUrl(`/forms/${encodeURIComponent(trimmedId)}`))
             );
 
+            const role: 'admin' | 'viewer' = hostSessionCode ? 'admin' : 'viewer';
+
             this.formSubject.next(form);
             this.currentFormId = trimmedId;
             this.lastQuestionId = null;
             this.resultsSubject.next(null);
-
-            const role: 'admin' | 'viewer' = hostSessionCode ? 'admin' : 'viewer';
+            this.roleSubject.next(role);
 
             this.joinParams = {
                 formId: trimmedId,
@@ -97,6 +100,7 @@ export class LiveFormService implements OnDestroy {
             const message = this.extractHttpErrorMessage(error);
             this.errorSubject.next(message);
             this.resetState();
+            this.roleSubject.next(null);
             throw error instanceof Error ? error : new Error(message);
         }
     }
@@ -113,6 +117,7 @@ export class LiveFormService implements OnDestroy {
         this.currentFormId = null;
         this.resetState();
         this.formSubject.next(null);
+        this.roleSubject.next(null);
     }
 
     public submitAnswer(choiceIds: string[]): void {
@@ -143,6 +148,44 @@ export class LiveFormService implements OnDestroy {
 
     public get currentQuestionSnapshot(): Question | null {
         return this.questionSubject.value;
+    }
+
+    public get roleSnapshot(): 'admin' | 'viewer' | null {
+        return this.roleSubject.value;
+    }
+
+    public closeCurrentQuestion(): void {
+        if (this.roleSubject.value !== 'admin') {
+            return;
+        }
+
+        const socket = this.socket;
+        const formId = this.currentFormId;
+        if (!socket || !socket.connected || !formId) {
+            this.errorSubject.next('Connexion administrateur indisponible, veuillez réessayer.');
+            return;
+        }
+
+        const questionId = this.questionSubject.value?.id;
+        const payload = { formId, questionId: questionId ?? undefined };
+
+        socket.emit('admin:lock', payload);
+        socket.emit('admin:reveal', payload);
+    }
+
+    public moveToNextQuestion(): void {
+        if (this.roleSubject.value !== 'admin') {
+            return;
+        }
+
+        const socket = this.socket;
+        const formId = this.currentFormId;
+        if (!socket || !socket.connected || !formId) {
+            this.errorSubject.next('Connexion administrateur indisponible, veuillez réessayer.');
+            return;
+        }
+
+        socket.emit('admin:next', { formId });
     }
 
     private initializeSocket(): void {

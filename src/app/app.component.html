@@ -53,26 +53,76 @@
   <section class="layout__content">
     <ng-container *ngIf="vm$ | async as vm">
       <ng-container *ngIf="vm.question as question; else waiting">
-        <div class="question-meta" *ngIf="vm.state as state">
-          <span class="question-meta__phase">
-            Phase : {{ state.phase === 'revealing' ? 'résultats' : 'questions' }}
-          </span>
-          <span class="question-meta__timer" *ngIf="state.timer?.remaining !== undefined">
-            Temps restant : {{ state.timer?.remaining }}s
-          </span>
-        </div>
+        <ng-container *ngIf="role$ | async as role">
+          <div class="question-meta" *ngIf="vm.state as state">
+            <span class="question-meta__phase">
+              Phase : {{ state.phase === 'revealing' ? 'résultats' : 'questions' }}
+            </span>
+            <span class="question-meta__timer" *ngIf="state.timer?.remaining !== undefined">
+              Temps restant : {{ state.timer?.remaining }}s
+            </span>
+          </div>
 
-        <app-question
-          [question]="question"
-          [locked]="vm.state?.locked ?? false"
-          (submitAnswer)="onSubmitAnswer($event)"
-        ></app-question>
+          <ng-container *ngIf="role === 'admin'; else viewerView">
+            <app-question
+              [question]="question"
+              [locked]="true"
+              [showSubmitButton]="false"
+            ></app-question>
 
-        <app-question-results
-          [question]="question"
-          [results]="vm.results"
-          [visible]="vm.state?.revealResults ?? false"
-        ></app-question-results>
+            <div class="admin-controls">
+              <button
+                type="button"
+                class="admin-controls__button"
+                (click)="onCloseQuestion()"
+                [disabled]="!canCloseQuestion(vm.state)"
+              >
+                Fermer la question
+              </button>
+              <button
+                type="button"
+                class="admin-controls__button admin-controls__button--secondary"
+                (click)="onNextQuestion()"
+                [disabled]="!canGoToNextQuestion(vm.state)"
+              >
+                Question suivante
+              </button>
+            </div>
+
+            <app-question-results
+              [question]="question"
+              [results]="vm.results"
+              [visible]="true"
+            ></app-question-results>
+          </ng-container>
+
+          <ng-template #viewerView>
+            <ng-container *ngIf="vm.state?.revealResults; else viewerQuestion">
+              <app-question-results
+                [question]="question"
+                [results]="vm.results"
+                [visible]="true"
+              ></app-question-results>
+            </ng-container>
+
+            <ng-template #viewerQuestion>
+              <ng-container *ngIf="!hasSubmittedAnswer; else waitingForResults">
+                <app-question
+                  [question]="question"
+                  [locked]="vm.state?.locked ?? false"
+                  (submitAnswer)="onSubmitAnswer($event)"
+                ></app-question>
+              </ng-container>
+
+              <ng-template #waitingForResults>
+                <div class="waiting-message">
+                  <h3>Réponse envoyée</h3>
+                  <p>En attente des résultats…</p>
+                </div>
+              </ng-template>
+            </ng-template>
+          </ng-template>
+        </ng-container>
       </ng-container>
     </ng-container>
 

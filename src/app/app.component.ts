@@ -9,12 +9,13 @@ import {
   Validators
 } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { QuestionComponent } from './components/question/question.component';
 import { QuestionResultsComponent } from './components/question-results/question-results.component';
 import { LiveFormService } from './core/services/live-form.service';
+import type { LiveState } from './core/models/live.model';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -62,9 +63,14 @@ export class AppComponent implements OnDestroy {
   });
 
   public readonly error$ = this.liveFormService.error$.pipe(startWith(null));
+  public readonly role$ = this.liveFormService.role$;
 
   public connectionError: string | null = null;
   public isConnecting = false;
+  public hasSubmittedAnswer = false;
+
+  private currentQuestionId: string | null = null;
+  private readonly questionSubscription: Subscription;
 
   constructor() {
     const defaultFormId = environment.defaultFormId?.trim();
@@ -72,6 +78,15 @@ export class AppComponent implements OnDestroy {
       this.connectionForm.patchValue({ formId: defaultFormId });
       void this.connectToForm();
     }
+
+    this.questionSubscription = this.liveFormService.currentQuestion$.subscribe((question) => {
+      const newQuestionId = question?.id ?? null;
+
+      if (this.currentQuestionId !== newQuestionId) {
+        this.currentQuestionId = newQuestionId;
+        this.hasSubmittedAnswer = false;
+      }
+    });
   }
 
   public async connectToForm(): Promise<void> {
@@ -111,10 +126,40 @@ export class AppComponent implements OnDestroy {
   }
 
   public onSubmitAnswer(choiceIds: string[]): void {
+    if (this.hasSubmittedAnswer || this.liveFormService.roleSnapshot !== 'viewer') {
+      return;
+    }
+
     this.liveFormService.submitAnswer(choiceIds);
+    this.hasSubmittedAnswer = true;
+  }
+
+  public onCloseQuestion(): void {
+    this.liveFormService.closeCurrentQuestion();
+  }
+
+  public onNextQuestion(): void {
+    this.liveFormService.moveToNextQuestion();
+  }
+
+  public canCloseQuestion(state: LiveState | null | undefined): boolean {
+    if (this.liveFormService.roleSnapshot !== 'admin' || !state) {
+      return false;
+    }
+
+    return !state.locked || !state.revealResults;
+  }
+
+  public canGoToNextQuestion(state: LiveState | null | undefined): boolean {
+    if (this.liveFormService.roleSnapshot !== 'admin' || !state) {
+      return false;
+    }
+
+    return !!state.locked;
   }
 
   public ngOnDestroy(): void {
+    this.questionSubscription.unsubscribe();
     this.liveFormService.disconnect();
   }
 }
