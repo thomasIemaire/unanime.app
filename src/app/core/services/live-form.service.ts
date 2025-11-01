@@ -18,6 +18,7 @@ import type { Question } from '../models/question.model';
 
 interface JoinOptions {
     sessionCode?: string;
+    hostSessionCode?: string;
     participantId?: string;
     displayName?: string;
 }
@@ -54,6 +55,17 @@ export class LiveFormService implements OnDestroy {
             throw new Error('Veuillez renseigner un identifiant de formulaire.');
         }
 
+        const sessionCode = options.sessionCode?.trim() || undefined;
+        const hostSessionCode = options.hostSessionCode?.trim() || undefined;
+
+        if (sessionCode && hostSessionCode) {
+            throw new Error("Veuillez ne renseigner qu'un seul code d'accès.");
+        }
+
+        if (!sessionCode && !hostSessionCode) {
+            throw new Error('Veuillez renseigner un code participant ou un code administrateur.');
+        }
+
         this.disconnect();
         this.errorSubject.next(null);
 
@@ -67,11 +79,14 @@ export class LiveFormService implements OnDestroy {
             this.lastQuestionId = null;
             this.resultsSubject.next(null);
 
+            const role: 'admin' | 'viewer' = hostSessionCode ? 'admin' : 'viewer';
+
             this.joinParams = {
                 formId: trimmedId,
-                role: 'viewer',
-                sessionCode: options.sessionCode,
-                participantId: options.participantId,
+                role,
+                sessionCode: role === 'viewer' ? sessionCode : undefined,
+                hostSessionCode: role === 'admin' ? hostSessionCode : undefined,
+                participantId: role === 'viewer' ? options.participantId : undefined,
                 displayName: options.displayName
             };
 

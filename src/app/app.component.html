@@ -12,14 +12,34 @@
       </label>
 
       <label class="connection-form__field">
-        <span>Code session (optionnel)</span>
+        <span>Code participant</span>
         <input type="text" formControlName="sessionCode" placeholder="Code participant" />
       </label>
 
       <label class="connection-form__field">
-        <span>Identifiant participant (optionnel)</span>
-        <input type="text" formControlName="participantId" placeholder="Identifiant personnalisé" />
+        <span>Code administrateur</span>
+        <input type="text" formControlName="hostSessionCode" placeholder="Code administrateur" />
       </label>
+
+      <small
+        class="connection-form__error"
+        *ngIf="
+          connectionForm.hasError('missingCode') &&
+          (connectionForm.get('sessionCode')?.touched || connectionForm.get('hostSessionCode')?.touched)
+        "
+      >
+        Renseignez un code participant ou un code administrateur.
+      </small>
+
+      <small
+        class="connection-form__error"
+        *ngIf="
+          connectionForm.hasError('multipleCodes') &&
+          (connectionForm.get('sessionCode')?.touched || connectionForm.get('hostSessionCode')?.touched)
+        "
+      >
+        Veuillez renseigner un seul code d'accès.
+      </small>
 
       <button class="connection-form__submit" type="submit" [disabled]="isConnecting">
         {{ isConnecting ? 'Connexion…' : 'Rejoindre la session' }}
