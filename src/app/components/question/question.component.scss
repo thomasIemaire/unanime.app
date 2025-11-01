@@ -53,29 +53,6 @@
             }
         }
 
-        .question-info__container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            padding: 0 2rem;
-
-            .question-info__chip {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.35rem 0.75rem;
-                border-radius: 9999px;
-                font-size: var(--font-size-s);
-                font-weight: 500;
-                background: rgba(0, 0, 0, 0.08);
-
-                &--locked {
-                    background: rgba(239, 68, 68, 0.15);
-                    color: #b91c1c;
-                }
-            }
-        }
-
         .question-choices__container {
             flex: 1 1 auto;
             width: 100%;
