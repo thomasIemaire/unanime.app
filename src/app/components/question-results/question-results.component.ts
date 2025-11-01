@@ -36,6 +36,7 @@ export class QuestionResultsComponent implements OnChanges {
   @Input() public question: Question | null = null;
   @Input() public results: QuestionAggregates | null = null;
   @Input() public visible = false;
+  @Input() public showPendingMessage = true;
 
   public chartSeries: ApexAxisChartSeries = [];
   public chartOptions: Partial<ApexOptions> = {};
