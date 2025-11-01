@@ -4,6 +4,7 @@ export interface QuestionAggregates {
     questionId: string;
     totals: Array<{ choiceId: string; count: number }>;
     totalResponses: number;
+    texts: string[];
 }
 
 export interface LiveSettings {

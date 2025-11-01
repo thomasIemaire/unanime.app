@@ -7,22 +7,41 @@
   </div>
 
   <ng-container *ngIf="visible || !showPendingMessage; else pending">
-    <apx-chart
-      *ngIf="hasData"
-      class="results__chart"
-      [series]="chartSeries"
-      [chart]="chartOptions.chart!"
-      [plotOptions]="chartOptions.plotOptions!"
-      [dataLabels]="chartOptions.dataLabels!"
-      [xaxis]="chartOptions.xaxis!"
-      [yaxis]="chartOptions.yaxis!"
-      [fill]="chartOptions.fill!"
-      [tooltip]="chartOptions.tooltip!"
-    ></apx-chart>
+    <ng-container *ngIf="isTextQuestion; else chartResults">
+      <ul *ngIf="textResponses.length > 0; else emptyText" class="results__texts">
+        <li *ngFor="let response of textResponses; trackBy: trackTextResponse" class="results__text-item">
+          <span class="results__text-value">{{ response.text }}</span>
+          <span class="results__text-count" *ngIf="response.count > 1">
+            {{ response.count }} réponses
+          </span>
+        </li>
+      </ul>
 
-    <p class="results__empty" *ngIf="!hasData">
-      Aucune réponse pour le moment.
-    </p>
+      <ng-template #emptyText>
+        <p class="results__empty">
+          Aucune réponse pour le moment.
+        </p>
+      </ng-template>
+    </ng-container>
+
+    <ng-template #chartResults>
+      <apx-chart
+        *ngIf="hasData"
+        class="results__chart"
+        [series]="chartSeries"
+        [chart]="chartOptions.chart!"
+        [plotOptions]="chartOptions.plotOptions!"
+        [dataLabels]="chartOptions.dataLabels!"
+        [xaxis]="chartOptions.xaxis!"
+        [yaxis]="chartOptions.yaxis!"
+        [fill]="chartOptions.fill!"
+        [tooltip]="chartOptions.tooltip!"
+      ></apx-chart>
+
+      <p class="results__empty" *ngIf="!hasData">
+        Aucune réponse pour le moment.
+      </p>
+    </ng-template>
   </ng-container>
 
   <ng-template #pending>

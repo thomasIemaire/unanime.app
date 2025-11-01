@@ -14,11 +14,12 @@ import { QuestionChoice } from "../../core/models/question.model";
             <ng-container [ngSwitch]="choice.input">
                 <span *ngSwitchCase="'choice'" class="choice__text">{{ choice.text }}</span>
 
-                <label *ngSwitchCase="'text'" class="choice__text choice__text--with-input">
-                    <span class="choice__label">{{ choice.text }}</span>
+                <label *ngSwitchCase="'text'" class="choice__text choice__text--editable">
+                    <span class="choice__label" [class.choice__label--hidden]="value">{{ choice.text }}</span>
+                    <span class="choice__value" *ngIf="value">{{ value }}</span>
                     <input
                         *ngIf="isSelected"
-                        class="choice__input"
+                        class="choice__input choice__input--overlay"
                         type="text"
                         [value]="value"
                         [attr.minlength]="choice.constraints?.minLength ?? null"
