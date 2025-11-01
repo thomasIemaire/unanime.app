@@ -15,7 +15,9 @@ import { startWith } from 'rxjs/operators';
 import { QuestionComponent } from './components/question/question.component';
 import { QuestionResultsComponent } from './components/question-results/question-results.component';
 import { LiveFormService } from './core/services/live-form.service';
+import type { Form } from './core/models/live.model';
 import type { LiveState } from './core/models/live.model';
+import type { Question } from './core/models/question.model';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -57,6 +59,7 @@ export class AppComponent implements OnDestroy {
   );
 
   public readonly vm$ = combineLatest({
+    form: this.liveFormService.form$,
     state: this.liveFormService.state$,
     question: this.liveFormService.currentQuestion$,
     results: this.liveFormService.results$
@@ -162,6 +165,16 @@ export class AppComponent implements OnDestroy {
     this.liveFormService.moveToNextQuestion();
   }
 
+  public onCloseAndNext(state: LiveState | null | undefined): void {
+    if (this.canCloseQuestion(state)) {
+      this.onCloseQuestion();
+    }
+
+    if (this.canGoToNextQuestion(state)) {
+      this.onNextQuestion();
+    }
+  }
+
   public onResetForm(): void {
     this.liveFormService.resetForm();
   }
@@ -180,6 +193,45 @@ export class AppComponent implements OnDestroy {
     }
 
     return !!state.locked;
+  }
+
+  public canCloseAndNext(
+    state: LiveState | null | undefined
+  ): boolean {
+    return this.canCloseQuestion(state) || this.canGoToNextQuestion(state);
+  }
+
+  public getQuestionProgress(
+    question: Question | null | undefined,
+    form: Form | null | undefined
+  ): { current: number; total: number } | null {
+    if (!question) {
+      return null;
+    }
+
+    const sections = form?.sections ?? [];
+
+    if (sections.length === 0) {
+      return null;
+    }
+
+    const allQuestions = sections.flatMap((section) => section.items ?? []);
+    const total = allQuestions.length;
+
+    if (total === 0) {
+      return null;
+    }
+
+    const currentIndex = allQuestions.findIndex((item) => item.id === question.id);
+
+    if (currentIndex === -1) {
+      return null;
+    }
+
+    return {
+      current: Math.min(currentIndex + 1, total),
+      total
+    };
   }
 
   public ngOnDestroy(): void {
