@@ -5,6 +5,7 @@ import {
   ApexChart,
   ApexDataLabels,
   ApexFill,
+  ApexNonAxisChartSeries,
   ApexPlotOptions,
   ApexTooltip,
   ApexXAxis,
@@ -16,13 +17,14 @@ import type { Question } from '../../core/models/question.model';
 import type { QuestionAggregates } from '../../core/models/live.model';
 
 type ApexOptions = {
-  chart: ApexChart;
-  plotOptions: ApexPlotOptions;
-  dataLabels: ApexDataLabels;
-  xaxis: ApexXAxis;
-  yaxis: ApexYAxis;
-  fill: ApexFill;
-  tooltip: ApexTooltip;
+  chart?: ApexChart;
+  plotOptions?: ApexPlotOptions;
+  dataLabels?: ApexDataLabels;
+  xaxis?: ApexXAxis;
+  yaxis?: ApexYAxis;
+  fill?: ApexFill;
+  tooltip?: ApexTooltip;
+  labels?: string[];
 };
 
 @Component({
@@ -38,7 +40,7 @@ export class QuestionResultsComponent implements OnChanges {
   @Input() public visible = false;
   @Input() public showPendingMessage = true;
 
-  public chartSeries: ApexAxisChartSeries = [];
+  public chartSeries: ApexAxisChartSeries | ApexNonAxisChartSeries = [];
   public chartOptions: Partial<ApexOptions> = {};
   public hasData = false;
   public totalResponses = 0;
@@ -76,65 +78,107 @@ export class QuestionResultsComponent implements OnChanges {
       ? results.totalResponses
       : data.reduce((sum, value) => sum + value, 0);
 
-    this.chartSeries = [
-      {
-        name: 'Réponses',
-        data
-      }
-    ];
+    const statisticsType = question.reveal?.statistics?.statisticsType ?? 'bar_chart';
 
-    this.chartOptions = {
-      chart: {
-        type: 'bar',
-        height: 320,
-        animations: { enabled: true }
-      },
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          distributed: true,
-          borderRadius: 6,
+    switch (statisticsType) {
+      case 'pie_chart': {
+        this.chartSeries = data;
+        this.chartOptions = {
+          chart: {
+            type: 'pie',
+            height: 320,
+            animations: { enabled: true }
+          },
+          labels: categories,
           dataLabels: {
-            position: 'right'
+            enabled: true,
+            formatter: (
+              _value: number,
+              opts: { seriesIndex?: number; w?: { globals?: { series?: number[] } } }
+            ) => {
+              const seriesIndex = opts.seriesIndex;
+              if (seriesIndex === undefined) {
+                return '';
+              }
+
+              const count = opts.w?.globals?.series?.[seriesIndex] ?? data[seriesIndex] ?? 0;
+              return `${Math.round(count)}`;
+            }
+          },
+          tooltip: {
+            enabled: true,
+            y: {
+              formatter: (value: number) => `${value} réponse${value > 1 ? 's' : ''}`
+            }
           }
-        }
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: (value: number) => Math.round(value).toString(),
-        offsetX: 8
-      },
-      xaxis: {
-        categories,
-        labels: {
-          style: {
-            fontSize: '12px'
-          }
-        }
-      },
-      yaxis: {
-        labels: {
-          style: {
-            fontSize: '12px'
-          }
-        }
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shadeIntensity: 0.35,
-          inverseColors: false,
-          opacityFrom: 0.9,
-          opacityTo: 0.9
-        }
-      },
-      tooltip: {
-        enabled: true,
-        y: {
-          formatter: (value: number) => `${value} réponse${value > 1 ? 's' : ''}`
-        }
+        };
+        break;
       }
-    };
+
+      case 'bar_chart':
+      default: {
+        this.chartSeries = [
+          {
+            name: 'Réponses',
+            data
+          }
+        ];
+
+        this.chartOptions = {
+          chart: {
+            type: 'bar',
+            height: 320,
+            animations: { enabled: true }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: true,
+              distributed: true,
+              borderRadius: 6,
+              dataLabels: {
+                position: 'right'
+              }
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: (value: number) => Math.round(value).toString(),
+            offsetX: 8
+          },
+          xaxis: {
+            categories,
+            labels: {
+              style: {
+                fontSize: '12px'
+              }
+            }
+          },
+          yaxis: {
+            labels: {
+              style: {
+                fontSize: '12px'
+              }
+            }
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shadeIntensity: 0.35,
+              inverseColors: false,
+              opacityFrom: 0.9,
+              opacityTo: 0.9
+            }
+          },
+          tooltip: {
+            enabled: true,
+            y: {
+              formatter: (value: number) => `${value} réponse${value > 1 ? 's' : ''}`
+            }
+          }
+        };
+        break;
+      }
+    }
 
     this.hasData = data.some((value) => value > 0);
   }

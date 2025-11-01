@@ -8,15 +8,6 @@
     <ng-container *ngIf="vm$ | async as vm">
       <ng-container *ngIf="vm.question as question; else waiting">
         <ng-container *ngIf="role$ | async as role">
-          <div class="question-meta" *ngIf="vm.state as state">
-            <span class="question-meta__phase">
-              Phase : {{ state.phase === 'revealing' ? 'résultats' : 'questions' }}
-            </span>
-            <span class="question-meta__timer" *ngIf="state.timer?.remaining !== undefined">
-              Temps restant : {{ state.timer?.remaining }}s
-            </span>
-          </div>
-
           <ng-container *ngIf="role === 'admin'; else viewerView">
             <ng-container *ngIf="vm.state?.revealResults; else adminQuestion">
               <div class="admin-controls">
@@ -75,6 +66,12 @@
 
           <ng-template #viewerView>
             <ng-container *ngIf="(vm.state?.revealResults ?? false) || (vm.state?.locked ?? false); else viewerQuestion">
+              <app-question
+                [question]="question"
+                [locked]="true"
+                [showSubmitButton]="false"
+                [showChoices]="false"
+              ></app-question>
               <app-question-results
                 [question]="question"
                 [results]="vm.results"
