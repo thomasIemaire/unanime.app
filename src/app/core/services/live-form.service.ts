@@ -337,17 +337,19 @@ export class LiveFormService implements OnDestroy {
             counts[String(choiceId)] = (counts[String(choiceId)] ?? 0) + (Number.isFinite(parsedValue) ? parsedValue : 0);
         };
 
-        if (Array.isArray(aggregates?.choices)) {
-            for (const entry of aggregates.choices) {
-                register(entry?.choiceId ?? entry?.id, entry?.count ?? entry?.value ?? entry?.total);
+        const extractArrayEntries = (entries: unknown) => {
+            if (!Array.isArray(entries)) {
+                return;
             }
-        }
 
-        if (Array.isArray(aggregates)) {
-            for (const entry of aggregates) {
+            for (const entry of entries) {
                 register(entry?.choiceId ?? entry?.id, entry?.count ?? entry?.value ?? entry?.total);
             }
-        }
+        };
+
+        extractArrayEntries(aggregates?.choices);
+        extractArrayEntries(aggregates?.byChoice);
+        extractArrayEntries(aggregates);
 
         const objectBuckets = [aggregates?.counts, aggregates?.byChoice, aggregates?.choices];
         for (const bucket of objectBuckets) {
@@ -362,7 +364,21 @@ export class LiveFormService implements OnDestroy {
         totals.sort((a, b) => b.count - a.count);
 
         const computedTotal = totals.reduce((sum, entry) => sum + entry.count, 0);
-        const explicitTotal = Number(aggregates?.totalResponses ?? aggregates?.total ?? aggregates?.count);
+
+        const totalsArray = Array.isArray(aggregates?.totals) ? aggregates.totals : null;
+        const totalsArrayValue = totalsArray
+            ? totalsArray.reduce((sum: number, entry: any) => {
+                  const value = Number(entry?.total ?? entry?.count ?? entry?.value);
+                  return Number.isFinite(value) ? sum + value : sum;
+              }, 0)
+            : undefined;
+
+        const explicitTotal = Number(
+            aggregates?.totalResponses ??
+                aggregates?.total ??
+                aggregates?.count ??
+                (Number.isFinite(totalsArrayValue) ? totalsArrayValue : undefined)
+        );
 
         return {
             questionId,
