@@ -17,11 +17,6 @@ import { Question, QuestionChoice } from "../../core/models/question.model";
                 </div>
             </div>
 
-            <div class="question-info__container">
-                <span class="question-info__chip" *ngIf="question.allowMultiple">Réponses multiples autorisées</span>
-                <span class="question-info__chip question-info__chip--locked" *ngIf="locked">Question verrouillée</span>
-            </div>
-
             <div class="question-choices__container" *ngIf="showChoices">
                 <div class="question-choices__wrapper">
                     <app-choice
