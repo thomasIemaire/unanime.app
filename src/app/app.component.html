@@ -10,14 +10,19 @@
         <ng-container *ngIf="role$ | async as role">
           <ng-container *ngIf="role === 'admin'; else viewerView">
             <ng-container *ngIf="vm.state?.revealResults; else adminQuestion">
+              <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
+                <p class="question-progress">
+                  Question n°{{ progress.current }} sur {{ progress.total }}
+                </p>
+              </ng-container>
               <div class="admin-controls">
                 <button
                   type="button"
                   class="admin-controls__button admin-controls__button--secondary"
-                  (click)="onNextQuestion()"
-                  [disabled]="!canGoToNextQuestion(vm.state)"
+                  (click)="onCloseAndNext(vm.state)"
+                  [disabled]="!canCloseAndNext(vm.state)"
                 >
-                  Question suivante
+                  Fermer et question suivante
                 </button>
                 <button
                   type="button"
@@ -36,6 +41,11 @@
             </ng-container>
 
             <ng-template #adminQuestion>
+              <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
+                <p class="question-progress">
+                  Question n°{{ progress.current }} sur {{ progress.total }}
+                </p>
+              </ng-container>
               <app-question
                 [question]="question"
                 [locked]="true"
@@ -47,18 +57,10 @@
                 <button
                   type="button"
                   class="admin-controls__button"
-                  (click)="onCloseQuestion()"
-                  [disabled]="!canCloseQuestion(vm.state)"
+                  (click)="onCloseAndNext(vm.state)"
+                  [disabled]="!canCloseAndNext(vm.state)"
                 >
-                  Fermer la question
-                </button>
-                <button
-                  type="button"
-                  class="admin-controls__button admin-controls__button--secondary"
-                  (click)="onNextQuestion()"
-                  [disabled]="!canGoToNextQuestion(vm.state)"
-                >
-                  Question suivante
+                  Fermer et question suivante
                 </button>
                 <button
                   type="button"
@@ -80,6 +82,11 @@
 
           <ng-template #viewerView>
             <ng-container *ngIf="(vm.state?.revealResults ?? false) || (vm.state?.locked ?? false); else viewerQuestion">
+              <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
+                <p class="question-progress">
+                  Question n°{{ progress.current }} sur {{ progress.total }}
+                </p>
+              </ng-container>
               <app-question
                 [question]="question"
                 [locked]="true"
@@ -96,6 +103,11 @@
 
             <ng-template #viewerQuestion>
               <ng-container *ngIf="!hasSubmittedAnswer; else answeredWaiting">
+                <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
+                  <p class="question-progress">
+                    Question n°{{ progress.current }} sur {{ progress.total }}
+                  </p>
+                </ng-container>
                 <app-question
                   [question]="question"
                   [locked]="vm.state?.locked ?? false"
@@ -104,6 +116,11 @@
               </ng-container>
 
               <ng-template #answeredWaiting>
+                <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
+                  <p class="question-progress">
+                    Question n°{{ progress.current }} sur {{ progress.total }}
+                  </p>
+                </ng-container>
                 <app-question
                   [question]="question"
                   [locked]="true"
