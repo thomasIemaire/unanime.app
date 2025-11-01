@@ -98,6 +98,60 @@
   color: rgba(15, 23, 42, 0.7);
 }
 
+.admin-controls {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+  flex-wrap: wrap;
+}
+
+.admin-controls__button {
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.85rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 12px 30px rgba(220, 38, 38, 0.25);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+  }
+}
+
+.admin-controls__button--secondary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+}
+
+.waiting-message {
+  margin-top: 2rem;
+  padding: 2.5rem 2rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.3rem, 1.1vw + 1rem, 1.8rem);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--font-size-m);
+    color: rgba(15, 23, 42, 0.65);
+  }
+}
+
 .placeholder {
   margin: auto;
   text-align: center;

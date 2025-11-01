@@ -35,7 +35,7 @@ import { Question, QuestionChoice } from "../../core/models/question.model";
                 </div>
             </div>
 
-            <div class="question-send__container">
+            <div class="question-send__container" *ngIf="showSubmitButton">
                 <div class="question-send__wrapper">
                     <button
                         type="button"
@@ -57,6 +57,9 @@ export class QuestionComponent implements OnChanges {
 
     @Input()
     public locked = false;
+
+    @Input()
+    public showSubmitButton = true;
 
     @Output()
     public submitAnswer: EventEmitter<string[]> = new EventEmitter<string[]>();

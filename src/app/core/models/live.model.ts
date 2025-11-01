@@ -83,6 +83,11 @@ export interface JoinFormPayload {
     displayName?: string;
 }
 
+export interface AdminActionPayload {
+    formId: string;
+    questionId?: string;
+}
+
 export interface SubmitAnswerPayload {
     formId: string;
     questionId: string;
@@ -97,11 +102,9 @@ export type ClientToServerEvents = {
     join_form: (payload: JoinFormPayload) => void;
     get_state: (payload: GetStatePayload) => void;
     submit_answer: (payload: SubmitAnswerPayload) => void;
-    'admin:set_question'?: never;
-    'admin:start_question'?: never;
-    'admin:next'?: never;
-    'admin:reveal'?: never;
-    'admin:lock'?: never;
+    'admin:lock': (payload: AdminActionPayload) => void;
+    'admin:next': (payload: AdminActionPayload) => void;
+    'admin:reveal': (payload: AdminActionPayload) => void;
 };
 
 export type ServerToClientEvents = {
