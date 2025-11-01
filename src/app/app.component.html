@@ -1,56 +1,10 @@
 <main class="layout">
-  <section class="layout__sidebar">
-    <h1 class="app-title">Live questionnaire</h1>
-
-    <form class="connection-form" [formGroup]="connectionForm" (ngSubmit)="connectToForm()">
-      <label class="connection-form__field">
-        <span>Identifiant du formulaire</span>
-        <input type="text" formControlName="formId" placeholder="Ex : demo-form" />
-        <small class="connection-form__error" *ngIf="connectionForm.get('formId')?.invalid && connectionForm.get('formId')?.touched">
-          Veuillez renseigner un identifiant valide.
-        </small>
-      </label>
-
-      <label class="connection-form__field">
-        <span>Code participant</span>
-        <input type="text" formControlName="sessionCode" placeholder="Code participant" />
-      </label>
-
-      <label class="connection-form__field">
-        <span>Code administrateur</span>
-        <input type="text" formControlName="hostSessionCode" placeholder="Code administrateur" />
-      </label>
-
-      <small
-        class="connection-form__error"
-        *ngIf="
-          connectionForm.hasError('missingCode') &&
-          (connectionForm.get('sessionCode')?.touched || connectionForm.get('hostSessionCode')?.touched)
-        "
-      >
-        Renseignez un code participant ou un code administrateur.
-      </small>
-
-      <small
-        class="connection-form__error"
-        *ngIf="
-          connectionForm.hasError('multipleCodes') &&
-          (connectionForm.get('sessionCode')?.touched || connectionForm.get('hostSessionCode')?.touched)
-        "
-      >
-        Veuillez renseigner un seul code d'accès.
-      </small>
-
-      <button class="connection-form__submit" type="submit" [disabled]="isConnecting">
-        {{ isConnecting ? 'Connexion…' : 'Rejoindre la session' }}
-      </button>
-    </form>
-
-    <p class="connection-form__error" *ngIf="connectionError">{{ connectionError }}</p>
-    <p class="connection-form__error" *ngIf="(error$ | async) as liveError">{{ liveError }}</p>
-  </section>
-
   <section class="layout__content">
+    <div class="connection-status">
+      <p class="connection-status__error" *ngIf="connectionError">{{ connectionError }}</p>
+      <p class="connection-status__error" *ngIf="(error$ | async) as liveError">{{ liveError }}</p>
+    </div>
+
     <ng-container *ngIf="vm$ | async as vm">
       <ng-container *ngIf="vm.question as question; else waiting">
         <ng-container *ngIf="role$ | async as role">
@@ -120,11 +74,12 @@
           </ng-container>
 
           <ng-template #viewerView>
-            <ng-container *ngIf="vm.state?.revealResults; else viewerQuestion">
+            <ng-container *ngIf="(vm.state?.revealResults ?? false) || (vm.state?.locked ?? false); else viewerQuestion">
               <app-question-results
                 [question]="question"
                 [results]="vm.results"
                 [visible]="true"
+                [showPendingMessage]="false"
               ></app-question-results>
             </ng-container>
 
@@ -147,8 +102,8 @@
                 <app-question-results
                   [question]="question"
                   [results]="vm.results"
-                  [visible]="vm.state?.revealResults ?? false"
-                  [showPendingMessage]="!(vm.state?.revealResults ?? false)"
+                  [visible]="(vm.state?.revealResults ?? false) || (vm.state?.locked ?? false)"
+                  [showPendingMessage]="!((vm.state?.revealResults ?? false) || (vm.state?.locked ?? false))"
                 ></app-question-results>
               </ng-template>
             </ng-template>
@@ -160,7 +115,7 @@
     <ng-template #waiting>
       <div class="placeholder">
         <h2>Sélectionnez un formulaire pour commencer</h2>
-        <p>Renseignez l'identifiant du formulaire dans le panneau de gauche.</p>
+        <p>Renseignez l'identifiant du formulaire pour rejoindre une session.</p>
       </div>
     </ng-template>
   </section>
