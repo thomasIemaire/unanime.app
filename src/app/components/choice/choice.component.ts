@@ -5,8 +5,9 @@ import { QuestionChoice } from "../../core/models/question.model";
     selector: "app-choice",
     imports: [],
     template: `
-    <div class="choice__container" 
-        (click)="this.selected.emit(this.choice);"
+    <div class="choice__container"
+        (click)="onClick()"
+        [class.disabled]="disabled"
         [style.animationDelay]="(index * 0.1) + 's'">
         <div class="choice__wrapper" [class.selected]="isSelected">
             <span class="choice__text">{{ choice.text }}</span>
@@ -20,11 +21,22 @@ export class ChoiceComponent {
     public choice!: QuestionChoice;
 
     @Input({ required: true })
-    public isSelected: boolean = false;
+    public isSelected = false;
 
     @Input()
-    public index: number = 0;
+    public index = 0;
+
+    @Input()
+    public disabled = false;
 
     @Output()
     public selected: EventEmitter<QuestionChoice> = new EventEmitter<QuestionChoice>();
+
+    public onClick(): void {
+        if (this.disabled) {
+            return;
+        }
+
+        this.selected.emit(this.choice);
+    }
 }
