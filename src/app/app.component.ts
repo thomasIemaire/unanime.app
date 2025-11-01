@@ -71,12 +71,17 @@ export class AppComponent implements OnDestroy {
 
   private currentQuestionId: string | null = null;
   private readonly questionSubscription: Subscription;
+  private pendingJoinMetadata: { participantId?: string; displayName?: string } | null = null;
 
   constructor() {
-    const defaultFormId = environment.defaultFormId?.trim();
-    if (defaultFormId) {
-      this.connectionForm.patchValue({ formId: defaultFormId });
-      void this.connectToForm();
+    const initializedFromUrl = this.initializeConnectionFromUrl();
+
+    if (!initializedFromUrl) {
+      const defaultFormId = environment.defaultFormId?.trim();
+      if (defaultFormId) {
+        this.connectionForm.patchValue({ formId: defaultFormId });
+        void this.connectToForm();
+      }
     }
 
     this.questionSubscription = this.liveFormService.currentQuestion$.subscribe((question) => {
@@ -113,11 +118,26 @@ export class AppComponent implements OnDestroy {
 
     this.isConnecting = true;
     try {
-      const joinOptions = trimmedHostSessionCode
+      const joinOptions: {
+        sessionCode?: string;
+        hostSessionCode?: string;
+        participantId?: string;
+        displayName?: string;
+      } = trimmedHostSessionCode
         ? { hostSessionCode: trimmedHostSessionCode }
         : { sessionCode: trimmedSessionCode };
 
+      if (this.pendingJoinMetadata) {
+        if (this.pendingJoinMetadata.participantId) {
+          joinOptions.participantId = this.pendingJoinMetadata.participantId;
+        }
+        if (this.pendingJoinMetadata.displayName) {
+          joinOptions.displayName = this.pendingJoinMetadata.displayName;
+        }
+      }
+
       await this.liveFormService.joinForm(trimmedFormId ?? '', joinOptions);
+      this.pendingJoinMetadata = null;
     } catch (error) {
       this.connectionError = error instanceof Error ? error.message : 'Impossible de rejoindre le formulaire.';
     } finally {
@@ -161,6 +181,66 @@ export class AppComponent implements OnDestroy {
   public ngOnDestroy(): void {
     this.questionSubscription.unsubscribe();
     this.liveFormService.disconnect();
+  }
+
+  private initializeConnectionFromUrl(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    let url: URL | null = null;
+    try {
+      url = new URL(window.location.href);
+    } catch {
+      return false;
+    }
+
+    if (!url) {
+      return false;
+    }
+
+    const searchParams = url.searchParams;
+    const formId = searchParams.get('formId')?.trim() || undefined;
+    const role = searchParams.get('role')?.trim()?.toLowerCase();
+    let sessionCode = searchParams.get('sessionCode')?.trim() || undefined;
+    let hostSessionCode = searchParams.get('hostSessionCode')?.trim() || undefined;
+    const genericCode = searchParams.get('code')?.trim() || undefined;
+
+    if (genericCode) {
+      if (role === 'admin') {
+        hostSessionCode = hostSessionCode || genericCode;
+      } else {
+        sessionCode = sessionCode || genericCode;
+      }
+    }
+
+    const participantId = searchParams.get('participantId')?.trim() || undefined;
+    const displayName = searchParams.get('displayName')?.trim() || undefined;
+
+    const shouldAutoConnect = !!formId && (!!sessionCode || !!hostSessionCode);
+
+    if (!formId && !sessionCode && !hostSessionCode && !participantId && !displayName) {
+      return false;
+    }
+
+    this.connectionForm.patchValue({
+      formId: formId ?? '',
+      sessionCode: sessionCode ?? '',
+      hostSessionCode: hostSessionCode ?? ''
+    });
+
+    if (participantId || displayName) {
+      this.pendingJoinMetadata = {
+        participantId: participantId || undefined,
+        displayName: displayName || undefined
+      };
+    }
+
+    if (shouldAutoConnect) {
+      void this.connectToForm();
+    }
+
+    return true;
   }
 }
 

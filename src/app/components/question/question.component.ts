@@ -22,7 +22,7 @@ import { Question, QuestionChoice } from "../../core/models/question.model";
                 <span class="question-info__chip question-info__chip--locked" *ngIf="locked">Question verrouillée</span>
             </div>
 
-            <div class="question-choices__container">
+            <div class="question-choices__container" *ngIf="showChoices">
                 <div class="question-choices__wrapper">
                     <app-choice
                         *ngFor="let choice of question.choices; let i = index; trackBy: trackChoice"
@@ -60,6 +60,9 @@ export class QuestionComponent implements OnChanges {
 
     @Input()
     public showSubmitButton = true;
+
+    @Input()
+    public showChoices = true;
 
     @Output()
     public submitAnswer: EventEmitter<string[]> = new EventEmitter<string[]>();
