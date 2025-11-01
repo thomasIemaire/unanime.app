@@ -209,6 +209,7 @@ export class LiveFormService implements OnDestroy {
         socket.on('connect', this.handleConnect);
         socket.on('state', this.handleState);
         socket.on('results', this.handleResults);
+        socket.on('admin:results', this.handleAdminResults);
         socket.on('error_msg', this.handleErrorMessage);
         socket.on('disconnect', this.handleDisconnect);
         socket.on('connect_error', this.handleConnectError);
@@ -222,6 +223,7 @@ export class LiveFormService implements OnDestroy {
         this.socket.off('connect', this.handleConnect);
         this.socket.off('state', this.handleState);
         this.socket.off('results', this.handleResults);
+        this.socket.off('admin:results', this.handleAdminResults);
         this.socket.off('error_msg', this.handleErrorMessage);
         this.socket.off('disconnect', this.handleDisconnect);
         this.socket.off('connect_error', this.handleConnectError);
@@ -255,6 +257,10 @@ export class LiveFormService implements OnDestroy {
         this.resultsSubject.next(aggregates);
     };
 
+    private readonly handleAdminResults = (payload: ResultsPayload) => {
+        this.handleResults(payload);
+    };
+
     private readonly handleErrorMessage = (payload: ErrorMessagePayload) => {
         if (!payload) {
             return;
@@ -262,7 +268,20 @@ export class LiveFormService implements OnDestroy {
 
         this.errorSubject.next(payload.message);
 
-        if (payload.code === 'form_not_found') {
+        const disconnectErrorCodes = new Set([
+            'form_not_found',
+            'invalid_session_code',
+            'invalid_host_code',
+            'invalid_access_code',
+            'unauthorized',
+            'forbidden'
+        ]);
+
+        const shouldDisconnect =
+            disconnectErrorCodes.has(payload.code) ||
+            (typeof payload.code === 'string' && payload.code.startsWith('invalid_'));
+
+        if (shouldDisconnect) {
             this.disconnect();
         }
     };

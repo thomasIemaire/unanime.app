@@ -152,6 +152,16 @@
   }
 }
 
+.waiting-message--inline {
+  margin: 1.25rem 0 1.5rem;
+  padding: 1rem 1.5rem;
+  text-align: left;
+
+  p {
+    font-size: var(--font-size-s);
+  }
+}
+
 .placeholder {
   margin: auto;
   text-align: center;

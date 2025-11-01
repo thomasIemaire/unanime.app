@@ -64,36 +64,57 @@
           </div>
 
           <ng-container *ngIf="role === 'admin'; else viewerView">
-            <app-question
-              [question]="question"
-              [locked]="true"
-              [showSubmitButton]="false"
-            ></app-question>
+            <ng-container *ngIf="vm.state?.revealResults; else adminQuestion">
+              <div class="admin-controls">
+                <button
+                  type="button"
+                  class="admin-controls__button admin-controls__button--secondary"
+                  (click)="onNextQuestion()"
+                  [disabled]="!canGoToNextQuestion(vm.state)"
+                >
+                  Question suivante
+                </button>
+              </div>
 
-            <div class="admin-controls">
-              <button
-                type="button"
-                class="admin-controls__button"
-                (click)="onCloseQuestion()"
-                [disabled]="!canCloseQuestion(vm.state)"
-              >
-                Fermer la question
-              </button>
-              <button
-                type="button"
-                class="admin-controls__button admin-controls__button--secondary"
-                (click)="onNextQuestion()"
-                [disabled]="!canGoToNextQuestion(vm.state)"
-              >
-                Question suivante
-              </button>
-            </div>
+              <app-question-results
+                [question]="question"
+                [results]="vm.results"
+                [visible]="true"
+              ></app-question-results>
+            </ng-container>
 
-            <app-question-results
-              [question]="question"
-              [results]="vm.results"
-              [visible]="true"
-            ></app-question-results>
+            <ng-template #adminQuestion>
+              <app-question
+                [question]="question"
+                [locked]="true"
+                [showSubmitButton]="false"
+              ></app-question>
+
+              <div class="admin-controls">
+                <button
+                  type="button"
+                  class="admin-controls__button"
+                  (click)="onCloseQuestion()"
+                  [disabled]="!canCloseQuestion(vm.state)"
+                >
+                  Fermer la question
+                </button>
+                <button
+                  type="button"
+                  class="admin-controls__button admin-controls__button--secondary"
+                  (click)="onNextQuestion()"
+                  [disabled]="!canGoToNextQuestion(vm.state)"
+                >
+                  Question suivante
+                </button>
+              </div>
+
+              <app-question-results
+                [question]="question"
+                [results]="vm.results"
+                [visible]="false"
+              ></app-question-results>
+            </ng-template>
           </ng-container>
 
           <ng-template #viewerView>
@@ -106,7 +127,7 @@
             </ng-container>
 
             <ng-template #viewerQuestion>
-              <ng-container *ngIf="!hasSubmittedAnswer; else waitingForResults">
+              <ng-container *ngIf="!hasSubmittedAnswer; else answeredWaiting">
                 <app-question
                   [question]="question"
                   [locked]="vm.state?.locked ?? false"
@@ -114,11 +135,15 @@
                 ></app-question>
               </ng-container>
 
-              <ng-template #waitingForResults>
-                <div class="waiting-message">
-                  <h3>Réponse envoyée</h3>
+              <ng-template #answeredWaiting>
+                <div class="waiting-message waiting-message--inline">
                   <p>En attente des résultats…</p>
                 </div>
+                <app-question
+                  [question]="question"
+                  [locked]="true"
+                  [showSubmitButton]="false"
+                ></app-question>
               </ng-template>
             </ng-template>
           </ng-template>
