@@ -18,6 +18,12 @@ export interface QuestionChoice {
     isCorrect: boolean;
 }
 
+export interface QuestionAnswerSelection {
+    choiceIds: string[];
+    text?: string;
+    number?: number;
+}
+
 export interface QuestionRevealExplanation {
     showExplanation: boolean;
     explanationText?: string;

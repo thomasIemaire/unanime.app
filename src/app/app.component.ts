@@ -17,7 +17,7 @@ import { QuestionResultsComponent } from './components/question-results/question
 import { LiveFormService } from './core/services/live-form.service';
 import type { Form } from './core/models/live.model';
 import type { LiveState } from './core/models/live.model';
-import type { Question } from './core/models/question.model';
+import type { Question, QuestionAnswerSelection } from './core/models/question.model';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -148,12 +148,12 @@ export class AppComponent implements OnDestroy {
     }
   }
 
-  public onSubmitAnswer(choiceIds: string[]): void {
+  public onSubmitAnswer(selection: QuestionAnswerSelection): void {
     if (this.hasSubmittedAnswer || this.liveFormService.roleSnapshot !== 'viewer') {
       return;
     }
 
-    this.liveFormService.submitAnswer(choiceIds);
+    this.liveFormService.submitAnswer(selection);
     this.hasSubmittedAnswer = true;
   }
 

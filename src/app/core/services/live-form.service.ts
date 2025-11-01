@@ -15,7 +15,7 @@ import type {
     ResultsPayload,
     ServerToClientEvents
 } from '../models/live.model';
-import type { Question } from '../models/question.model';
+import type { Question, QuestionAnswerSelection } from '../models/question.model';
 
 interface JoinOptions {
     sessionCode?: string;
@@ -124,7 +124,7 @@ export class LiveFormService implements OnDestroy {
         this.roleSubject.next(null);
     }
 
-    public submitAnswer(choiceIds: string[]): void {
+    public submitAnswer(selection: QuestionAnswerSelection): void {
         const activeQuestion = this.questionSubject.value;
         const formId = this.currentFormId;
 
@@ -133,6 +133,7 @@ export class LiveFormService implements OnDestroy {
             return;
         }
 
+        const choiceIds = selection.choiceIds;
         if (!Array.isArray(choiceIds) || choiceIds.length === 0) {
             this.errorSubject.next('Sélectionnez au moins une réponse pour participer.');
             return;
@@ -143,10 +144,20 @@ export class LiveFormService implements OnDestroy {
             return;
         }
 
+        const value: { choiceIds: string[]; text?: string; number?: number } = { choiceIds };
+
+        if (selection.text !== undefined) {
+            value.text = selection.text;
+        }
+
+        if (selection.number !== undefined) {
+            value.number = selection.number;
+        }
+
         this.socket.emit('submit_answer', {
             formId,
             questionId: activeQuestion.id,
-            value: { choiceIds }
+            value
         });
     }
 

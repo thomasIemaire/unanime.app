@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
 import { ChoiceComponent } from "../choice/choice.component";
-import { Question, QuestionChoice } from "../../core/models/question.model";
+import { Question, QuestionAnswerSelection, QuestionChoice } from "../../core/models/question.model";
 
 @Component({
     selector: "app-question",
@@ -24,8 +24,10 @@ import { Question, QuestionChoice } from "../../core/models/question.model";
                         [choice]="choice"
                         [index]="i"
                         [isSelected]="isChoiceSelected(choice)"
+                        [value]="getChoiceValue(choice)"
                         [disabled]="locked"
-                        (selected)="onChoiceSelected(choice)"
+                        (selected)="onChoiceSelected($event)"
+                        (valueChange)="onChoiceValueChange(choice, $event)"
                     ></app-choice>
                 </div>
             </div>
@@ -60,13 +62,15 @@ export class QuestionComponent implements OnChanges {
     public showChoices = true;
 
     @Output()
-    public submitAnswer: EventEmitter<string[]> = new EventEmitter<string[]>();
+    public submitAnswer: EventEmitter<QuestionAnswerSelection> = new EventEmitter<QuestionAnswerSelection>();
 
     private readonly selectedChoiceIds = new Set<string>();
+    private readonly choiceValues = new Map<string, string>();
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes["question"]) {
             this.selectedChoiceIds.clear();
+            this.choiceValues.clear();
         }
     }
 
@@ -75,15 +79,46 @@ export class QuestionComponent implements OnChanges {
             return;
         }
 
+        const isSelected = this.selectedChoiceIds.has(choice.id);
+
         if (this.question.allowMultiple) {
-            this.toggleChoiceSelection(choice.id);
-        } else {
-            if (this.selectedChoiceIds.has(choice.id)) {
-                this.selectedChoiceIds.clear();
+            if (isSelected) {
+                this.selectedChoiceIds.delete(choice.id);
+                this.choiceValues.delete(choice.id);
             } else {
-                this.selectedChoiceIds.clear();
                 this.selectedChoiceIds.add(choice.id);
             }
+        } else {
+            if (isSelected) {
+                this.selectedChoiceIds.clear();
+                this.choiceValues.clear();
+            } else {
+                this.selectedChoiceIds.clear();
+                this.choiceValues.clear();
+                this.selectedChoiceIds.add(choice.id);
+            }
+        }
+    }
+
+    public onChoiceValueChange(choice: QuestionChoice, value: string): void {
+        if (this.locked) {
+            return;
+        }
+
+        if (!this.question.allowMultiple) {
+            const alreadySelected = this.selectedChoiceIds.has(choice.id);
+            if (!alreadySelected) {
+                this.selectedChoiceIds.clear();
+                this.choiceValues.clear();
+            }
+        }
+
+        this.selectedChoiceIds.add(choice.id);
+
+        if (value === "") {
+            this.choiceValues.delete(choice.id);
+        } else {
+            this.choiceValues.set(choice.id, value);
         }
     }
 
@@ -92,26 +127,121 @@ export class QuestionComponent implements OnChanges {
             return;
         }
 
-        this.submitAnswer.emit(Array.from(this.selectedChoiceIds));
+        const payload: QuestionAnswerSelection = {
+            choiceIds: Array.from(this.selectedChoiceIds)
+        };
+
+        const textValue = this.getFirstValueByType("text");
+        if (textValue !== undefined) {
+            payload.text = textValue;
+        }
+
+        const numberValue = this.getFirstNumberValue();
+        if (numberValue !== undefined) {
+            payload.number = numberValue;
+        }
+
+        this.submitAnswer.emit(payload);
     }
 
     public isChoiceSelected(choice: QuestionChoice): boolean {
         return this.selectedChoiceIds.has(choice.id);
     }
 
+    public getChoiceValue(choice: QuestionChoice): string {
+        return this.choiceValues.get(choice.id) ?? "";
+    }
+
     public get isSubmitDisabled(): boolean {
-        return this.locked || this.selectedChoiceIds.size === 0;
+        if (this.locked) {
+            return true;
+        }
+
+        if (this.selectedChoiceIds.size === 0) {
+            return true;
+        }
+
+        for (const choiceId of this.selectedChoiceIds) {
+            const choice = this.question.choices.find((item) => item.id === choiceId);
+            if (!choice) {
+                continue;
+            }
+
+            if (choice.input === "text") {
+                const value = this.choiceValues.get(choiceId) ?? "";
+                const length = value.trim().length;
+                const constraints = choice.constraints;
+
+                if (length === 0) {
+                    return true;
+                }
+
+                if (constraints?.minLength !== undefined && length < constraints.minLength) {
+                    return true;
+                }
+
+                if (constraints?.maxLength !== undefined && length > constraints.maxLength) {
+                    return true;
+                }
+            }
+
+            if (choice.input === "number") {
+                const raw = this.choiceValues.get(choiceId);
+                if (raw === undefined || raw.trim() === "") {
+                    return true;
+                }
+
+                const parsed = Number(raw.trim());
+                if (Number.isNaN(parsed)) {
+                    return true;
+                }
+
+                const constraints = choice.constraints;
+                if (constraints?.minValue !== undefined && parsed < constraints.minValue) {
+                    return true;
+                }
+
+                if (constraints?.maxValue !== undefined && parsed > constraints.maxValue) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public trackChoice(index: number, choice: QuestionChoice): string {
         return choice.id ?? String(index);
     }
 
-    private toggleChoiceSelection(choiceId: string): void {
-        if (this.selectedChoiceIds.has(choiceId)) {
-            this.selectedChoiceIds.delete(choiceId);
-        } else {
-            this.selectedChoiceIds.add(choiceId);
+    private getFirstValueByType(inputType: "text" | "number"): string | undefined {
+        for (const choiceId of this.selectedChoiceIds) {
+            const choice = this.question.choices.find((item) => item.id === choiceId);
+            if (!choice) {
+                continue;
+            }
+
+            if (choice.input === inputType) {
+                const value = this.choiceValues.get(choiceId);
+                if (value !== undefined) {
+                    const trimmedValue = value.trim();
+                    if (trimmedValue !== "") {
+                        return trimmedValue;
+                    }
+                }
+            }
         }
+
+        return undefined;
+    }
+
+    private getFirstNumberValue(): number | undefined {
+        const raw = this.getFirstValueByType("number");
+        if (raw === undefined) {
+            return undefined;
+        }
+
+        const parsed = Number(raw);
+        return Number.isNaN(parsed) ? undefined : parsed;
     }
 }
