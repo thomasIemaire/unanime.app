@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { startWith } from 'rxjs/operators';
@@ -22,11 +29,31 @@ export class AppComponent implements OnDestroy {
   private readonly liveFormService: LiveFormService = inject(LiveFormService);
   private readonly fb: FormBuilder = new FormBuilder();
 
-  public readonly connectionForm = this.fb.group({
-    formId: ['', [Validators.required, Validators.minLength(1)]],
-    sessionCode: [''],
-    participantId: ['']
-  });
+  private static requireAccessCode(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const sessionCode = control.get('sessionCode')?.value?.toString().trim();
+      const hostSessionCode = control.get('hostSessionCode')?.value?.toString().trim();
+
+      if (sessionCode && hostSessionCode) {
+        return { multipleCodes: true };
+      }
+
+      if (!sessionCode && !hostSessionCode) {
+        return { missingCode: true };
+      }
+
+      return null;
+    };
+  }
+
+  public readonly connectionForm = this.fb.group(
+    {
+      formId: ['', [Validators.required, Validators.minLength(1)]],
+      sessionCode: [''],
+      hostSessionCode: ['']
+    },
+    { validators: AppComponent.requireAccessCode() }
+  );
 
   public readonly vm$ = combineLatest({
     state: this.liveFormService.state$,
@@ -52,22 +79,30 @@ export class AppComponent implements OnDestroy {
 
     if (this.connectionForm.invalid) {
       this.connectionForm.markAllAsTouched();
+
+      if (this.connectionForm.get('formId')?.invalid) {
+        this.connectionError = 'Veuillez renseigner un identifiant de formulaire.';
+      } else if (this.connectionForm.hasError('missingCode')) {
+        this.connectionError = 'Veuillez renseigner un code participant ou un code administrateur.';
+      } else if (this.connectionForm.hasError('multipleCodes')) {
+        this.connectionError = 'Veuillez ne renseigner qu\'un seul code d\'accès.';
+      }
+
       return;
     }
 
-    const { formId, sessionCode, participantId } = this.connectionForm.getRawValue();
-
-    if (!formId) {
-      this.connectionError = 'Veuillez renseigner un identifiant de formulaire.';
-      return;
-    }
+    const { formId, sessionCode, hostSessionCode } = this.connectionForm.getRawValue();
+    const trimmedFormId = formId?.trim();
+    const trimmedSessionCode = sessionCode?.trim();
+    const trimmedHostSessionCode = hostSessionCode?.trim();
 
     this.isConnecting = true;
     try {
-      await this.liveFormService.joinForm(formId, {
-        sessionCode: sessionCode?.trim() || undefined,
-        participantId: participantId?.trim() || undefined
-      });
+      const joinOptions = trimmedHostSessionCode
+        ? { hostSessionCode: trimmedHostSessionCode }
+        : { sessionCode: trimmedSessionCode };
+
+      await this.liveFormService.joinForm(trimmedFormId ?? '', joinOptions);
     } catch (error) {
       this.connectionError = error instanceof Error ? error.message : 'Impossible de rejoindre le formulaire.';
     } finally {
