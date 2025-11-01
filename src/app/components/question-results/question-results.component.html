@@ -11,13 +11,13 @@
       *ngIf="hasData"
       class="results__chart"
       [series]="chartSeries"
-      [chart]="chartOptions.chart"
-      [plotOptions]="chartOptions.plotOptions"
-      [dataLabels]="chartOptions.dataLabels"
-      [xaxis]="chartOptions.xaxis"
-      [yaxis]="chartOptions.yaxis"
-      [fill]="chartOptions.fill"
-      [tooltip]="chartOptions.tooltip"
+      [chart]="chartOptions.chart!"
+      [plotOptions]="chartOptions.plotOptions!"
+      [dataLabels]="chartOptions.dataLabels!"
+      [xaxis]="chartOptions.xaxis!"
+      [yaxis]="chartOptions.yaxis!"
+      [fill]="chartOptions.fill!"
+      [tooltip]="chartOptions.tooltip!"
     ></apx-chart>
 
     <p class="results__empty" *ngIf="!hasData">

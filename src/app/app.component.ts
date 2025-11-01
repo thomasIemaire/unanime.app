@@ -19,6 +19,9 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent implements OnDestroy {
 
+  private readonly liveFormService: LiveFormService = inject(LiveFormService);
+  private readonly fb: FormBuilder = new FormBuilder();
+
   public readonly connectionForm = this.fb.group({
     formId: ['', [Validators.required, Validators.minLength(1)]],
     sessionCode: [''],
@@ -36,10 +39,7 @@ export class AppComponent implements OnDestroy {
   public connectionError: string | null = null;
   public isConnecting = false;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly liveFormService: LiveFormService
-  ) {
+  constructor() {
     const defaultFormId = environment.defaultFormId?.trim();
     if (defaultFormId) {
       this.connectionForm.patchValue({ formId: defaultFormId });
@@ -83,3 +83,7 @@ export class AppComponent implements OnDestroy {
     this.liveFormService.disconnect();
   }
 }
+function inject<T>(token: new (...args: any[]) => T): T {
+  return new token();
+}
+
