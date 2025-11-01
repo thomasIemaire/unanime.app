@@ -2,16 +2,12 @@
     width: 100%;
     height: 100%;
 
-    padding: 5svh 0;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     user-select: none;
 
     .question__wrapper {
-        max-width: 90%;
-        width: 412px;
         height: 100%;
         display: flex;
         flex-direction: column;
