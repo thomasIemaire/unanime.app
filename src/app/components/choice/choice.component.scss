@@ -19,8 +19,10 @@
         padding: 12px 24px;
 
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
+        gap: 12px;
         text-align: center;
 
         background-color: #0000000c;
@@ -36,6 +38,29 @@
         .choice__text {
             font-size: var(--font-size-m);
             font-weight: 500;
+        }
+
+        .choice__input {
+            width: 100%;
+            max-width: 320px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            font-size: var(--font-size-s);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+            &:focus {
+                outline: none;
+                border-color: rgba(0, 0, 0, 0.25);
+                box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+            }
+
+            &:disabled {
+                background-color: rgba(255, 255, 255, 0.6);
+                border-color: rgba(0, 0, 0, 0.08);
+                cursor: not-allowed;
+            }
         }
     }
 }
