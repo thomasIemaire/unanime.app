@@ -1,0 +1,32 @@
+.choice__container {
+    width: 100%;
+
+    animation: bounceIn 0.6s ease;
+    cursor: pointer;
+
+    .choice__wrapper {
+        width: 100%;
+        
+        padding: 12px 24px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+
+        background-color: #0000000c;
+        border-radius: 1rem;
+
+        transition: .2s ease;
+
+        &.selected {
+            transform: scale(1.03);
+            background: linear-gradient(to top right, #ffffff, #fafafa);
+        }
+
+        .choice__text {
+            font-size: var(--font-size-m);
+            font-weight: 500;
+        }
+    }
+}

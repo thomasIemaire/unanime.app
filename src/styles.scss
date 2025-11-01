@@ -1,1 +1,80 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+    --gmp-static-s: .25rem;
+    --gmp-static-m: .5rem;
+    --gmp-static-l: 1rem;
+    --gmp-static-xl: 2rem;
+
+    --gap-s: var(--gmp-static-s);
+    --gap-m: var(--gmp-static-m);
+    --gap-l: var(--gmp-static-l);
+    --gap-xl: var(--gmp-static-xl);
+
+    --margin-s: var(--gmp-static-s);
+    --margin-m: var(--gmp-static-m);
+    --margin-l: var(--gmp-static-l);
+    --margin-xl: var(--gmp-static-xl);
+
+    --padding-s: var(--gmp-static-s);
+    --padding-m: var(--gmp-static-m);
+    --padding-l: var(--gmp-static-l);
+    --padding-xl: var(--gmp-static-xl);
+
+    --radius-s: calc(var(--gmp-static-s) / 2);
+    --radius-m: calc(var(--gmp-static-m) / 2);
+    --radius-l: calc(var(--gmp-static-l) / 2);
+    --radius-xl: calc(var(--gmp-static-xl) / 2);
+
+    --font-size-s: 0.875rem;
+    --font-size-m: 1rem;
+    --font-size-l: 1.25rem;
+    --font-size-xl: 1.5rem;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+
+    ::after,
+    ::before {
+        box-sizing: inherit;
+    }
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100dvh;
+    width: 100dvw;
+    font-size: 14px;
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", Segoe UI Symbol;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    line-height: normal;
+    color: var(--p-text-color);
+    // background: radial-gradient(circle, #23a6d5, #974796);
+    background: radial-gradient(circle, #ffe761, #ffe761);
+
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(.5);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    75% {
+        transform: scale(.92);
+    }
+    90% {
+        transform: scale(1.03);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
