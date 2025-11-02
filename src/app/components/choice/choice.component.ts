@@ -7,14 +7,12 @@ import { QuestionChoice } from "../../core/models/question.model";
     imports: [CommonModule],
     template: `
     <div class="choice__container"
-        (click)="onClick()"
         [class.disabled]="disabled"
+        [class.choice__container--input]="choice.input === 'text'"
         [style.animationDelay]="(index * 0.1) + 's'">
-        <div class="choice__wrapper" [class.selected]="isSelected">
-            <ng-container [ngSwitch]="choice.input">
-                <span *ngSwitchCase="'choice'" class="choice__text">{{ choice.text }}</span>
-
-                <label *ngSwitchCase="'text'" class="choice__text choice__text--editable">
+        <ng-container [ngSwitch]="choice.input">
+            <div *ngSwitchCase="'text'" class="choice__input-wrapper">
+                <label class="choice__text choice__text--editable">
                     <span class="choice__label">{{ choice.text }}</span>
                     <input
                         class="choice__input"
@@ -23,13 +21,17 @@ import { QuestionChoice } from "../../core/models/question.model";
                         [attr.placeholder]="choice.text"
                         [attr.minlength]="choice.constraints?.minLength ?? null"
                         [attr.maxlength]="choice.constraints?.maxLength ?? null"
-                        (click)="$event.stopPropagation()"
                         (input)="onValueInput($event)"
                         [disabled]="disabled"
                     />
                 </label>
+            </div>
 
-                <label *ngSwitchCase="'number'" class="choice__text choice__text--with-input">
+            <div *ngSwitchCase="'number'"
+                class="choice__wrapper"
+                [class.selected]="isSelected"
+                (click)="onClick()">
+                <label class="choice__text choice__text--with-input">
                     <span class="choice__label">{{ choice.text }}</span>
                     <input
                         *ngIf="isSelected"
@@ -43,8 +45,15 @@ import { QuestionChoice } from "../../core/models/question.model";
                         [disabled]="disabled"
                     />
                 </label>
-            </ng-container>
-        </div>
+            </div>
+
+            <div *ngSwitchDefault
+                class="choice__wrapper"
+                [class.selected]="isSelected"
+                (click)="onClick()">
+                <span class="choice__text">{{ choice.text }}</span>
+            </div>
+        </ng-container>
     </div>
     `,
     styleUrls: ["./choice.component.scss"]
