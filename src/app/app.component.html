@@ -24,17 +24,18 @@
               <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
                 <ng-container
                   *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: vm.state?.locked ?? false }"></ng-container>
+
+                <div class="admin-controls">
+                  <button type="button" class="admin-controls__button"
+                    (click)="onAdvanceToNextQuestion()" [disabled]="!canAdvanceToNextQuestion(vm.state)">
+                    Question suivante
+                  </button>
+                  <button type="button" class="admin-controls__button admin-controls__button--danger"
+                    *ngIf="isLastQuestion(progress)" (click)="onResetForm()">
+                    Réinitialiser le formulaire
+                  </button>
+                </div>
               </ng-container>
-              <div class="admin-controls">
-                <button type="button" class="admin-controls__button admin-controls__button--secondary"
-                  (click)="onAdvanceToNextQuestion()" [disabled]="!canAdvanceToNextQuestion(vm.state)">
-                  Question suivante
-                </button>
-                <button type="button" class="admin-controls__button admin-controls__button--danger"
-                  (click)="onResetForm()">
-                  Réinitialiser le formulaire
-                </button>
-              </div>
 
               <app-question-results [question]="question" [results]="vm.results"
                 [visible]="true"></app-question-results>
@@ -44,23 +45,24 @@
               <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
                 <ng-container
                   *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: true }"></ng-container>
+
+                <app-question [question]="question" [locked]="true" [showSubmitButton]="false"
+                  [showChoices]="false"></app-question>
+
+                <app-question-results [question]="question" [results]="vm.results" [visible]="false"
+                  [showPendingMessage]="false"></app-question-results>
+
+                <div class="admin-controls">
+                  <button type="button" class="admin-controls__button" (click)="onAdvanceToNextQuestion()"
+                    [disabled]="!canAdvanceToNextQuestion(vm.state)">
+                    Question suivante
+                  </button>
+                  <button type="button" class="admin-controls__button admin-controls__button--danger"
+                    *ngIf="isLastQuestion(progress)" (click)="onResetForm()">
+                    Réinitialiser le formulaire
+                  </button>
+                </div>
               </ng-container>
-              <app-question [question]="question" [locked]="true" [showSubmitButton]="false"
-                [showChoices]="false"></app-question>
-
-              <app-question-results [question]="question" [results]="vm.results" [visible]="false"
-                [showPendingMessage]="false"></app-question-results>
-
-              <div class="admin-controls">
-                <button type="button" class="admin-controls__button" (click)="onAdvanceToNextQuestion()"
-                  [disabled]="!canAdvanceToNextQuestion(vm.state)">
-                  Question suivante
-                </button>
-                <button type="button" class="admin-controls__button admin-controls__button--danger"
-                  (click)="onResetForm()">
-                  Réinitialiser le formulaire
-                </button>
-              </div>
             </ng-template>
           </ng-container>
 

@@ -206,6 +206,14 @@ export class AppComponent implements OnDestroy {
     };
   }
 
+  public isLastQuestion(progress: { current: number; total: number } | null | undefined): boolean {
+    if (!progress || progress.total <= 0) {
+      return false;
+    }
+
+    return progress.current >= progress.total;
+  }
+
   public ngOnDestroy(): void {
     this.questionSubscription.unsubscribe();
     this.liveFormService.disconnect();

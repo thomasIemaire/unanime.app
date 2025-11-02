@@ -24,13 +24,32 @@
     </ng-container>
 
     <ng-template #chartResults>
-      <apx-chart *ngIf="hasData" class="results__chart" [series]="chartSeries" [chart]="chartOptions.chart!"
-        [plotOptions]="chartOptions.plotOptions!" [dataLabels]="chartOptions.dataLabels!" [xaxis]="chartOptions.xaxis!"
-        [yaxis]="chartOptions.yaxis!" [fill]="chartOptions.fill!" [tooltip]="chartOptions.tooltip!"></apx-chart>
+      <div *ngIf="hasData; else emptyChoices" class="results__choices">
+        <div *ngFor="let result of choiceResults; let i = index; trackBy: trackChoiceResult"
+          class="results__choice">
+          <span class="results__choice-index">{{ i + 1 }}</span>
+          <div class="results__choice-content">
+            <div class="results__choice-header">
+              <span class="results__choice-label">{{ result.label }}</span>
+              <span class="results__choice-percentage">{{ result.percentage | number: '1.0-0' }}%</span>
+            </div>
+            <div class="results__choice-bar">
+              <div class="results__choice-bar-fill" [style.width.%]="result.percentage"></div>
+            </div>
+            <div class="results__choice-meta">
+              <span class="results__choice-count">
+                {{ result.count }} {{ result.count > 1 ? 'réponses' : 'réponse' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <p class="results__empty" *ngIf="!hasData">
-        Aucune réponse pour le moment.
-      </p>
+      <ng-template #emptyChoices>
+        <p class="results__empty">
+          Aucune réponse pour le moment.
+        </p>
+      </ng-template>
     </ng-template>
   </ng-container>
 
