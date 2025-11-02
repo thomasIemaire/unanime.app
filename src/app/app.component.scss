@@ -77,15 +77,23 @@
 }
 
 .admin-controls__button {
-  padding: 0.75rem 1.5rem;
+  width: 100%;
+
+  padding: 12px 24px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
   border-radius: 1rem;
   border: none;
   font-size: var(--font-size-m);
   font-weight: 600;
   cursor: pointer;
-  color: rgba(15, 23, 42, 0.9);
-  background: linear-gradient(to top right, #ffffff, #fafafa);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  background: #2563eb;
+  color: #ffffff;
   transition: transform 0.2s ease;
 
   &:disabled {
