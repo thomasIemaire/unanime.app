@@ -34,13 +34,12 @@ import { Question, QuestionAnswerSelection, QuestionChoice } from "../../core/mo
 
             <div class="question-send__container" *ngIf="showSubmitButton">
                 <div class="question-send__wrapper">
-                    <button
-                        type="button"
+                    <div
                         class="question-send__button"
                         (click)="onSubmit()"
-                        [disabled]="isSubmitDisabled">
+                        [class.disabled]="isSubmitDisabled">
                         Envoyer ma réponse
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
