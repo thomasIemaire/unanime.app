@@ -15,13 +15,12 @@ import { QuestionChoice } from "../../core/models/question.model";
                 <span *ngSwitchCase="'choice'" class="choice__text">{{ choice.text }}</span>
 
                 <label *ngSwitchCase="'text'" class="choice__text choice__text--editable">
-                    <span class="choice__label" [class.choice__label--hidden]="value">{{ choice.text }}</span>
-                    <span class="choice__value" *ngIf="value">{{ value }}</span>
+                    <span class="choice__label">{{ choice.text }}</span>
                     <input
-                        *ngIf="isSelected"
-                        class="choice__input choice__input--overlay"
+                        class="choice__input"
                         type="text"
                         [value]="value"
+                        [attr.placeholder]="choice.text"
                         [attr.minlength]="choice.constraints?.minLength ?? null"
                         [attr.maxlength]="choice.constraints?.maxLength ?? null"
                         (click)="$event.stopPropagation()"
@@ -73,7 +72,7 @@ export class ChoiceComponent {
     public valueChange: EventEmitter<string> = new EventEmitter<string>();
 
     public onClick(): void {
-        if (this.disabled) {
+        if (this.disabled || this.choice.input === "text") {
             return;
         }
 

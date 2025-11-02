@@ -95,17 +95,25 @@ export class QuestionResultsComponent implements OnChanges {
       return;
     }
 
-    this.choiceResults = question.choices.map((choice) => {
-      const count = counts.get(choice.id) ?? 0;
-      const percentage = this.totalResponses > 0 ? (count / this.totalResponses) * 100 : 0;
+    this.choiceResults = question.choices
+      .map((choice) => {
+        const count = counts.get(choice.id) ?? 0;
+        const percentage = this.totalResponses > 0 ? (count / this.totalResponses) * 100 : 0;
 
-      return {
-        id: choice.id,
-        label: choice.text ?? choice.id,
-        count,
-        percentage
-      };
-    });
+        return {
+          id: choice.id,
+          label: choice.text ?? choice.id,
+          count,
+          percentage
+        };
+      })
+      .sort((a, b) => {
+        if (b.count !== a.count) {
+          return b.count - a.count;
+        }
+
+        return a.label.localeCompare(b.label);
+      });
 
     this.hasData = this.choiceResults.length > 0;
   }
