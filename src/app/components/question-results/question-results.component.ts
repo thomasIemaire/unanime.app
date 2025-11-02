@@ -106,8 +106,8 @@ export class QuestionResultsComponent implements OnChanges {
     this.totalResponses = Number.isFinite(results.totalResponses)
       ? results.totalResponses
       : this.isTextQuestion
-      ? responses.length
-      : computedTotal;
+        ? responses.length
+        : computedTotal;
 
     if (this.isTextQuestion) {
       this.chartSeries = [];

@@ -1,6 +1,5 @@
 <section *ngIf="question" class="results" [class.results--visible]="visible">
   <div class="results__header">
-    <h2>Résultats</h2>
     <span class="results__counter" *ngIf="totalResponses > 0">
       {{ totalResponses }} {{ totalResponses > 1 ? 'réponses' : 'réponse' }}
     </span>
@@ -25,18 +24,9 @@
     </ng-container>
 
     <ng-template #chartResults>
-      <apx-chart
-        *ngIf="hasData"
-        class="results__chart"
-        [series]="chartSeries"
-        [chart]="chartOptions.chart!"
-        [plotOptions]="chartOptions.plotOptions!"
-        [dataLabels]="chartOptions.dataLabels!"
-        [xaxis]="chartOptions.xaxis!"
-        [yaxis]="chartOptions.yaxis!"
-        [fill]="chartOptions.fill!"
-        [tooltip]="chartOptions.tooltip!"
-      ></apx-chart>
+      <apx-chart *ngIf="hasData" class="results__chart" [series]="chartSeries" [chart]="chartOptions.chart!"
+        [plotOptions]="chartOptions.plotOptions!" [dataLabels]="chartOptions.dataLabels!" [xaxis]="chartOptions.xaxis!"
+        [yaxis]="chartOptions.yaxis!" [fill]="chartOptions.fill!" [tooltip]="chartOptions.tooltip!"></apx-chart>
 
       <p class="results__empty" *ngIf="!hasData">
         Aucune réponse pour le moment.

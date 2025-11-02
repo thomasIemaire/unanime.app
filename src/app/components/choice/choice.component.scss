@@ -36,7 +36,8 @@
 
         &.selected {
             transform: scale(1.03);
-            background: linear-gradient(to top right, #ffffff, #fafafa);
+            background: #23a6d5;
+            color: #ffffff;
         }
 
         .choice__text {
