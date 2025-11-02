@@ -26,10 +26,10 @@
     --radius-l: calc(var(--gmp-static-l) / 2);
     --radius-xl: calc(var(--gmp-static-xl) / 2);
 
-    --font-size-s: 0.875rem;
-    --font-size-m: 1rem;
-    --font-size-l: 1.25rem;
-    --font-size-xl: 1.5rem;
+    --font-size-s: 0.75rem;
+    --font-size-m: .875rem;
+    --font-size-l: 1rem;
+    --font-size-xl: 1.25rem;
 }
 
 * {
@@ -53,9 +53,6 @@ body {
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     line-height: normal;
     color: var(--p-text-color);
-    // background: radial-gradient(circle, #23a6d5, #974796);
-    background: radial-gradient(circle, #ffe761, #ffe761);
-
 }
 
 @keyframes bounceIn {

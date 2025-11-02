@@ -44,6 +44,8 @@ export class QuestionResultsComponent implements OnChanges {
   public chartOptions: Partial<ApexOptions> = {};
   public hasData = false;
   public totalResponses = 0;
+  public isTextQuestion = false;
+  public textResponses: Array<{ text: string; count: number }> = [];
 
   public ngOnChanges(_: SimpleChanges): void {
     this.refreshChart();
@@ -58,7 +60,33 @@ export class QuestionResultsComponent implements OnChanges {
       this.chartOptions = {};
       this.totalResponses = 0;
       this.hasData = false;
+      this.isTextQuestion = false;
+      this.textResponses = [];
       return;
+    }
+
+    this.isTextQuestion = question.choices.some((choice) => choice.input === 'text');
+
+    const responses = Array.isArray(results.texts) ? results.texts : [];
+    if (this.isTextQuestion) {
+      const textResponsesMap = new Map<string, number>();
+      for (const response of responses) {
+        const trimmed = response.trim();
+        if (trimmed !== '') {
+          textResponsesMap.set(trimmed, (textResponsesMap.get(trimmed) ?? 0) + 1);
+        }
+      }
+
+      this.textResponses = Array.from(textResponsesMap.entries())
+        .map(([text, count]) => ({ text, count }))
+        .sort((a, b) => {
+          if (b.count !== a.count) {
+            return b.count - a.count;
+          }
+          return a.text.localeCompare(b.text);
+        });
+    } else {
+      this.textResponses = [];
     }
 
     const counts = new Map<string, number>();
@@ -74,9 +102,19 @@ export class QuestionResultsComponent implements OnChanges {
       data.push(counts.get(choice.id) ?? 0);
     }
 
+    const computedTotal = data.reduce((sum, value) => sum + value, 0);
     this.totalResponses = Number.isFinite(results.totalResponses)
       ? results.totalResponses
-      : data.reduce((sum, value) => sum + value, 0);
+      : this.isTextQuestion
+        ? responses.length
+        : computedTotal;
+
+    if (this.isTextQuestion) {
+      this.chartSeries = [];
+      this.chartOptions = {};
+      this.hasData = this.textResponses.length > 0;
+      return;
+    }
 
     const statisticsType = question.reveal?.statistics?.statisticsType ?? 'bar_chart';
 
@@ -181,5 +219,9 @@ export class QuestionResultsComponent implements OnChanges {
     }
 
     this.hasData = data.some((value) => value > 0);
+  }
+
+  public trackTextResponse(_index: number, response: { text: string; count: number }): string {
+    return `${response.text}-${response.count}`;
   }
 }

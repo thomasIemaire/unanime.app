@@ -388,6 +388,7 @@ export class LiveFormService implements OnDestroy {
 
     private processAggregates(questionId: string, aggregates: any): QuestionAggregates {
         const counts: Record<string, number> = {};
+        const texts: string[] = [];
 
         const register = (choiceId: unknown, value: unknown) => {
             if (!choiceId) {
@@ -395,6 +396,40 @@ export class LiveFormService implements OnDestroy {
             }
             const parsedValue = Number(value);
             counts[String(choiceId)] = (counts[String(choiceId)] ?? 0) + (Number.isFinite(parsedValue) ? parsedValue : 0);
+        };
+
+        const registerText = (value: unknown) => {
+            if (value === null || value === undefined) {
+                return;
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (trimmed !== '') {
+                    texts.push(trimmed);
+                }
+                return;
+            }
+
+            if (typeof value === 'object') {
+                const possibleText =
+                    typeof (value as any)?.text === 'string'
+                        ? (value as any).text
+                        : typeof (value as any)?.value === 'string'
+                        ? (value as any).value
+                        : typeof (value as any)?.choiceId === 'string'
+                        ? (value as any).choiceId
+                        : typeof (value as any)?.id === 'string'
+                        ? (value as any).id
+                        : undefined;
+
+                if (possibleText) {
+                    const trimmed = possibleText.trim();
+                    if (trimmed !== '') {
+                        texts.push(trimmed);
+                    }
+                }
+            }
         };
 
         const extractArrayEntries = (entries: unknown) => {
@@ -410,6 +445,33 @@ export class LiveFormService implements OnDestroy {
         extractArrayEntries(aggregates?.choices);
         extractArrayEntries(aggregates?.byChoice);
         extractArrayEntries(aggregates);
+        const extractTextEntries = (entry: unknown) => {
+            if (entry === null || entry === undefined) {
+                return;
+            }
+
+            if (Array.isArray(entry)) {
+                for (const value of entry) {
+                    registerText(value);
+                }
+                return;
+            }
+
+            if (typeof entry === 'object') {
+                for (const value of Object.values(entry)) {
+                    registerText(value);
+                }
+                return;
+            }
+
+            registerText(entry);
+        };
+
+        extractTextEntries(aggregates?.texts);
+        extractTextEntries(aggregates?.text);
+        extractTextEntries(aggregates?.values);
+        extractTextEntries(aggregates?.byText);
+        extractTextEntries(aggregates?.byValue);
 
         const objectBuckets = [aggregates?.counts, aggregates?.byChoice, aggregates?.choices];
         for (const bucket of objectBuckets) {
@@ -443,7 +505,8 @@ export class LiveFormService implements OnDestroy {
         return {
             questionId,
             totals,
-            totalResponses: Number.isFinite(explicitTotal) ? explicitTotal : computedTotal
+            totalResponses: Number.isFinite(explicitTotal) ? explicitTotal : computedTotal,
+            texts
         };
     }
 
