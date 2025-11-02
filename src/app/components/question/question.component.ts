@@ -78,6 +78,10 @@ export class QuestionComponent implements OnChanges {
             return;
         }
 
+        if (choice.input === "text") {
+            return;
+        }
+
         const isSelected = this.selectedChoiceIds.has(choice.id);
 
         if (this.question.allowMultiple) {
@@ -101,6 +105,14 @@ export class QuestionComponent implements OnChanges {
 
     public onChoiceValueChange(choice: QuestionChoice, value: string): void {
         if (this.locked) {
+            return;
+        }
+
+        const trimmedValue = value.trim();
+
+        if (choice.input === "text" && trimmedValue === "") {
+            this.selectedChoiceIds.delete(choice.id);
+            this.choiceValues.delete(choice.id);
             return;
         }
 
@@ -251,14 +263,6 @@ export class QuestionComponent implements OnChanges {
             const choice = this.question.choices.find((item) => item.id === choiceId);
             if (!choice) {
                 continue;
-            }
-
-            if (choice.input === "text") {
-                const value = this.choiceValues.get(choiceId)?.trim();
-                if (value) {
-                    ids.push(value);
-                    continue;
-                }
             }
 
             ids.push(choiceId);
