@@ -44,7 +44,7 @@
             color: #ffffff;
         }
 
-        .choice__text {
+        .choice__text input {
             font-size: var(--font-size-m);
             font-weight: 500;
             display: flex;
@@ -95,7 +95,7 @@
         cursor: default;
     }
 
-    .choice__input-wrapper {
+    .choice__input-wrapper input {
         width: 100%;
         padding: 12px 24px;
 
@@ -105,6 +105,7 @@
 
         background-color: #0000000c;
         border-radius: 1rem;
+        border: none;
 
         transition: .2s ease;
 
