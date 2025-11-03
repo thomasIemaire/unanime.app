@@ -62,7 +62,8 @@ export class AppComponent implements OnDestroy {
     form: this.liveFormService.form$,
     state: this.liveFormService.state$,
     question: this.liveFormService.currentQuestion$,
-    results: this.liveFormService.results$
+    results: this.liveFormService.results$,
+    participantsCount: this.liveFormService.participantsCount$
   });
 
   public readonly error$ = this.liveFormService.error$.pipe(startWith(null));
