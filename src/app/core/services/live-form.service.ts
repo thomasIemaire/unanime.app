@@ -11,6 +11,7 @@ import type {
     Form,
     JoinFormPayload,
     LiveState,
+    ParticipantsCountPayload,
     QuestionAggregates,
     ResultsPayload,
     ServerToClientEvents
@@ -32,6 +33,7 @@ export class LiveFormService implements OnDestroy {
     private readonly resultsSubject = new BehaviorSubject<QuestionAggregates | null>(null);
     private readonly errorSubject = new BehaviorSubject<string | null>(null);
     private readonly roleSubject = new BehaviorSubject<'admin' | 'viewer' | null>(null);
+    private readonly participantsCountSubject = new BehaviorSubject<number>(0);
 
     private socket?: Socket<ServerToClientEvents, ClientToServerEvents>;
     private currentFormId: string | null = null;
@@ -46,6 +48,7 @@ export class LiveFormService implements OnDestroy {
     public readonly results$ = this.resultsSubject.asObservable();
     public readonly error$ = this.errorSubject.asObservable();
     public readonly role$ = this.roleSubject.asObservable();
+    public readonly participantsCount$ = this.participantsCountSubject.asObservable();
 
     constructor(private readonly http: HttpClient) {}
 
@@ -86,6 +89,7 @@ export class LiveFormService implements OnDestroy {
             this.resultsSubject.next(null);
             this.lastRequestedResultsQuestionId = null;
             this.roleSubject.next(role);
+            this.participantsCountSubject.next(0);
 
             this.joinParams = {
                 formId: trimmedId,
@@ -122,6 +126,7 @@ export class LiveFormService implements OnDestroy {
         this.resetState();
         this.formSubject.next(null);
         this.roleSubject.next(null);
+        this.participantsCountSubject.next(0);
     }
 
     public submitAnswer(selection: QuestionAnswerSelection): void {
@@ -248,6 +253,7 @@ export class LiveFormService implements OnDestroy {
         socket.on('error_msg', this.handleErrorMessage);
         socket.on('disconnect', this.handleDisconnect);
         socket.on('connect_error', this.handleConnectError);
+        socket.on('participants_count', this.handleParticipantsCount);
     }
 
     private removeSocketListeners(): void {
@@ -262,6 +268,7 @@ export class LiveFormService implements OnDestroy {
         this.socket.off('error_msg', this.handleErrorMessage);
         this.socket.off('disconnect', this.handleDisconnect);
         this.socket.off('connect_error', this.handleConnectError);
+        this.socket.off('participants_count', this.handleParticipantsCount);
     }
 
     private readonly handleConnect = () => {
@@ -318,6 +325,15 @@ export class LiveFormService implements OnDestroy {
 
         if (shouldDisconnect) {
             this.disconnect();
+        }
+    };
+
+    private readonly handleParticipantsCount = (payload: ParticipantsCountPayload) => {
+        const count = Number(payload?.count);
+        if (Number.isFinite(count) && count >= 0) {
+            this.participantsCountSubject.next(Math.trunc(count));
+        } else {
+            this.participantsCountSubject.next(0);
         }
     };
 
@@ -516,6 +532,7 @@ export class LiveFormService implements OnDestroy {
         this.resultsSubject.next(null);
         this.lastQuestionId = null;
         this.lastRequestedResultsQuestionId = null;
+        this.participantsCountSubject.next(0);
     }
 
     private buildApiUrl(path: string): string {

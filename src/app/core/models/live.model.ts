@@ -75,6 +75,10 @@ export interface ErrorMessagePayload {
     message: string;
 }
 
+export interface ParticipantsCountPayload {
+    count: number;
+}
+
 export interface JoinFormPayload {
     formId: string;
     role: 'admin' | 'viewer';
@@ -117,4 +121,5 @@ export type ServerToClientEvents = {
     'admin:results': (payload: ResultsPayload) => void;
     'admin:explanation': (payload: unknown) => void;
     error_msg: (payload: ErrorMessagePayload) => void;
+    participants_count: (payload: ParticipantsCountPayload) => void;
 };

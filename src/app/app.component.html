@@ -7,11 +7,21 @@
 
     <ng-container *ngIf="vm$ | async as vm">
       <ng-container *ngIf="vm.question as question; else waiting">
-        <ng-template #questionMeta let-progress let-locked="locked">
+        <ng-template #questionMeta let-progress let-locked="locked" let-participantsCount="participantsCount">
           <div class="question-meta">
-            <p class="question-progress">
-              Question n°{{ progress.current }} sur {{ progress.total }}
-            </p>
+            <div class="question-meta__info">
+              <p class="question-progress">
+                Question n°{{ progress.current }} sur {{ progress.total }}
+              </p>
+              <span class="question-tag question-tag--participants" *ngIf="participantsCount !== null">
+                <svg class="question-tag__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path
+                    d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 2c-2.67 0-8 1.34-8 4v1h16v-1c0-2.66-5.33-4-8-4Z"
+                    fill="currentColor" />
+                </svg>
+                {{ participantsCount }} participant{{ participantsCount > 1 ? 's' : '' }}
+              </span>
+            </div>
             <div class="question-tags" *ngIf="question.allowMultiple || locked">
               <span class="question-tag" *ngIf="question.allowMultiple">Réponses multiples autorisées</span>
               <span class="question-tag question-tag--locked" *ngIf="locked">Question verrouillée</span>
@@ -23,7 +33,7 @@
             <ng-container *ngIf="vm.state?.revealResults; else adminQuestion">
               <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
                 <ng-container
-                  *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: vm.state?.locked ?? false }"></ng-container>
+                  *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: vm.state?.locked ?? false, participantsCount: vm.participantsCount }"></ng-container>
 
                 <div class="admin-controls">
                   <div class="admin-controls__button" (click)="onAdvanceToNextQuestion()"
@@ -44,7 +54,7 @@
             <ng-template #adminQuestion>
               <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
                 <ng-container
-                  *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: true }"></ng-container>
+                  *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: true, participantsCount: vm.participantsCount }"></ng-container>
 
                 <app-question [question]="question" [locked]="true" [showSubmitButton]="false"
                   [showChoices]="false"></app-question>
@@ -71,7 +81,7 @@
               *ngIf="(vm.state?.revealResults ?? false) || (vm.state?.locked ?? false); else viewerQuestion">
               <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
                 <ng-container
-                  *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: vm.state?.locked ?? false }"></ng-container>
+                  *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: vm.state?.locked ?? false, participantsCount: vm.participantsCount }"></ng-container>
               </ng-container>
               <app-question [question]="question" [locked]="true" [showSubmitButton]="false"
                 [showChoices]="false"></app-question>
@@ -83,7 +93,7 @@
               <ng-container *ngIf="!hasSubmittedAnswer; else answeredWaiting">
                 <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
                   <ng-container
-                    *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: vm.state?.locked ?? false }"></ng-container>
+                    *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: vm.state?.locked ?? false, participantsCount: vm.participantsCount }"></ng-container>
                 </ng-container>
                 <app-question [question]="question" [locked]="vm.state?.locked ?? false"
                   (submitAnswer)="onSubmitAnswer($event)"></app-question>
@@ -92,7 +102,7 @@
               <ng-template #answeredWaiting>
                 <ng-container *ngIf="getQuestionProgress(question, vm.form) as progress">
                   <ng-container
-                    *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: true }"></ng-container>
+                    *ngTemplateOutlet="questionMeta; context: { $implicit: progress, locked: true, participantsCount: vm.participantsCount }"></ng-container>
                 </ng-container>
                 <app-question [question]="question" [locked]="true" [showSubmitButton]="false"
                   [showChoices]="false"></app-question>

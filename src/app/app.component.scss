@@ -35,6 +35,13 @@
   color: rgba(15, 23, 42, 0.7);
 }
 
+.question-meta__info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .question-progress {
   margin: 0;
   font-size: var(--font-size-m);
@@ -67,6 +74,16 @@
 .question-tag--locked {
   background: rgba(239, 68, 68, 0.15);
   color: #b91c1c;
+}
+
+.question-tag__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.question-tag--participants {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
 }
 
 .admin-controls {
